@@ -10,5 +10,7 @@ import java.util.List;
 @Transactional
 public interface WeatherCardDao extends CrudRepository<WeatherCard, Long> {
 
-    public List<WeatherCard> findAllByUser(User user);
+    List<WeatherCard> findAllByUser(User user);
+
+    WeatherCard findWeatherCardById(Long id);
 }

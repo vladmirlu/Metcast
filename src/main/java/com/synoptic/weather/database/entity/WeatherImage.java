@@ -1,25 +1,20 @@
 package com.synoptic.weather.database.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "weather_images")
 public class WeatherImage {
 
-    public  WeatherImage(String filename, byte[] file, String mimeType) {
-
-        this.file = file;
-        this.filename = filename;
-        this.mimeType = mimeType;
-    }
-
-    public  WeatherImage() {
-        // Default Constructor
-    }
-
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", unique = true, nullable = false)
     private long id;
 

@@ -1,27 +1,24 @@
 package com.synoptic.weather.database.entity;
 
+import lombok.Builder;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class Weather {
+@Builder
+@Table(name = "weather_units")
+public class WeatherUnit {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
     @Column
-    private LocalDate date;
-
-    @Column
-    private LocalTime time;
+    private LocalDateTime dateTime;
 
     @Column
     private String weatherDesc;
@@ -45,7 +42,7 @@ public class Weather {
     private int cloudCover;
 
     @Column
-    private int windSpeedMeterSec;
+    private int windspeedKmph;
 
     @OneToOne
     private WeatherImage weatherImage;

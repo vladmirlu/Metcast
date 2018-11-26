@@ -1,6 +1,5 @@
-package com.synoptic.weather.com.synoptic.weather.meteoapi;
+package com.synoptic.weather.api;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
@@ -16,10 +15,7 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class SynopticHttpClient {
@@ -41,19 +37,19 @@ public class SynopticHttpClient {
         throw new HttpResponseException(404, "Response Entity not found");
     }
 
-    public Map<String, JSONObject> responseToJSON(String url) throws IOException {
+    public Map<String, JSONArray> selectDataFromJSON(String url) throws IOException {
         JSONObject jsonObject = new JSONObject(findWeatherData(url));
         jsonObject = jsonObject.getJSONObject("data");
 
-        Map<String, JSONObject> map = new HashMap<>();
-        map.put(jsonObject.getJSONArray("current_condition").getJSONObject(0).getString("observation_time"), jsonObject.getJSONArray("current_condition").getJSONObject(0));
+        Map<String, JSONArray> map = new LinkedHashMap<>();
+        map.put(jsonObject.getJSONArray("current_condition").getJSONObject(0).getString("observation_time"), jsonObject.getJSONArray("current_condition"));
         JSONArray jsonArray = jsonObject.getJSONArray("weather");
-        map.put(jsonArray.getJSONObject(1).getString("date"), jsonArray.getJSONObject(1).getJSONArray("hourly").getJSONObject(6));
-        map.put(jsonArray.getJSONObject(2).getString("date"), jsonArray.getJSONObject(2).getJSONArray("hourly").getJSONObject(6));
-        map.put(jsonArray.getJSONObject(3).getString("date"), jsonArray.getJSONObject(3).getJSONArray("hourly").getJSONObject(6));
+        map.put(jsonArray.getJSONObject(1).getString("date"), jsonArray.getJSONObject(1).getJSONArray("hourly"));
+        map.put(jsonArray.getJSONObject(2).getString("date"), jsonArray.getJSONObject(2).getJSONArray("hourly"));
+        map.put(jsonArray.getJSONObject(3).getString("date"), jsonArray.getJSONObject(3).getJSONArray("hourly"));
+
         return map;
     }
-
 
     private CloseableHttpClient buildHttpClient() {
         return HttpClients.custom()
