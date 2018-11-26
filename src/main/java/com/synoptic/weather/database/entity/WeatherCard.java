@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Builder
@@ -22,11 +23,8 @@ public class WeatherCard {
     @Column(name = "location")
     private String location;
 
-    @Column(name = "current_weather")
-    private String currentWeather;
-
-    @Column(name = "forecast_weather")
-    private String forecastWeather;
+    @OneToMany
+    private List <Weather> weatherForecasts;
 
     @ManyToOne
     private User user;
