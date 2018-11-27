@@ -1,7 +1,9 @@
 package com.synoptic.weather.database.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -9,6 +11,8 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "weather_units")
 public class WeatherUnit {
 
@@ -21,31 +25,31 @@ public class WeatherUnit {
     private LocalDateTime dateTime;
 
     @Column
-    private String weatherDesc;
+    private String weatherDescription;
 
     @Column
-    private int tempC;
+    private int tempCelsius;
 
     @Column
-    private float precipMM;
+    private float precipitationMM;
 
     @Column
-    private int pressure;
+    private int pressureMillibars;
 
     @Column
-    private int humidity;
+    private int humidityPercent;
 
     @Column
-    private int visibility;
+    private int visibilityKm;
 
     @Column
-    private int cloudCover;
+    private int cloudCoverPercent;
 
     @Column
-    private int windspeedKmph;
+    private int windSpeedKmPerHour;
 
-    @OneToOne
-    private WeatherImage weatherImage;
+    @Column
+    private String weatherIconUrl;
 
 
 }

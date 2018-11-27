@@ -24,6 +24,9 @@ public class MetcastBuilder {
     @Value("${WWO_api_kay}")
     private String WWO_api_kay;
 
+    @Value("${WWO_days_forecast}")
+    private String WWO_days_forecast;
+
     @Autowired
     private ResourceBundle rb;
 
@@ -32,18 +35,13 @@ public class MetcastBuilder {
     @Autowired
     SynopticHttpClient client;
 
-    @PostConstruct
-    public void print() throws IOException{
-       WeatherCard weatherCard =  createWeatherCard(rb.getString("city"));
-       weatherCard.getWeatherUnits().forEach(weatherUnit -> System.out.println(weatherUnit));
-    }
+    public WeatherCard fillWeatherCard(WeatherCard weatherCard) throws IOException {
 
-    public WeatherCard createWeatherCard(String location) throws IOException {
-
-        Map<String, JSONArray> jsonObjectsMap = selectDataFromJSON(WWO_url + location + WWO_api_kay);
+        Map<String, JSONArray> jsonObjectsMap = selectDataFromJSON(WWO_url + weatherCard.getLocation() + WWO_api_kay + WWO_days_forecast);
         JSONObject weatherObjJSON = jsonObjectsMap.remove(jsonObjectsMap.keySet().stream().findFirst().get()).getJSONObject(0);
         WeatherUnit unit = buildWeatherUnit(weatherObjJSON, formatDateTime(LocalDateTime.now()));
-        return putWeatherUnitsInto(WeatherCard.builder().weatherUnits(new ArrayList<>(Collections.singletonList(unit))).build(), jsonObjectsMap);
+        weatherCard.setWeatherUnits(new ArrayList<>(Collections.singletonList(unit)));
+        return putWeatherUnitsInto(weatherCard, jsonObjectsMap);
     }
 
     public Map<String, JSONArray> selectDataFromJSON(String url) throws IOException {
@@ -61,14 +59,16 @@ public class MetcastBuilder {
     private WeatherUnit buildWeatherUnit(JSONObject weatherObjJSON, LocalDateTime dateTime){
 
         return  WeatherUnit.builder().dateTime(dateTime)
-                .weatherDesc(weatherObjJSON.getJSONArray("weatherDesc").getJSONObject(0).getString("value"))
-                .tempC(dateTime.isAfter(formatDateTime(LocalDateTime.now())) ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
-                .precipMM(weatherObjJSON.getFloat("precipMM"))
-                .pressure(weatherObjJSON.getInt("pressure"))
-                .humidity(weatherObjJSON.getInt("humidity"))
-                .visibility(weatherObjJSON.getInt("visibility"))
-                .cloudCover(weatherObjJSON.getInt("cloudcover"))
-                .windspeedKmph(weatherObjJSON.getInt("windspeedKmph")).build();
+                .weatherDescription(weatherObjJSON.getJSONArray("weatherDesc").getJSONObject(0).getString("value"))
+                .tempCelsius(dateTime.isAfter(formatDateTime(LocalDateTime.now())) ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
+                .precipitationMM(weatherObjJSON.getFloat("precipMM"))
+                .pressureMillibars(weatherObjJSON.getInt("pressure"))
+                .humidityPercent(weatherObjJSON.getInt("humidity"))
+                .visibilityKm(weatherObjJSON.getInt("visibility"))
+                .cloudCoverPercent(weatherObjJSON.getInt("cloudcover"))
+                .windSpeedKmPerHour(weatherObjJSON.getInt("windspeedKmph"))
+                .weatherIconUrl( weatherObjJSON.getJSONArray("weatherIconUrl").getJSONObject(0).getString("value")).build();
+
     }
 
     public WeatherCard putWeatherUnitsInto(WeatherCard weatherCard, Map<String, JSONArray> jsonObjectsMap){

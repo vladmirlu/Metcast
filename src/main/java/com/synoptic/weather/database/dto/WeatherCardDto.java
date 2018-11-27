@@ -11,8 +11,6 @@ import java.util.List;
 @Builder
 public class WeatherCardDto {
 
-    private Long id;
-
     private String location;
 
     private List<WeatherUnit> weatherUnits;

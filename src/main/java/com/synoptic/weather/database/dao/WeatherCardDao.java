@@ -12,5 +12,5 @@ public interface WeatherCardDao extends CrudRepository<WeatherCard, Long> {
 
     List<WeatherCard> findAllByUser(User user);
 
-    WeatherCard findWeatherCardById(Long id);
+    WeatherCard findWeatherCardByLocation(String location);
 }

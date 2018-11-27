@@ -26,12 +26,16 @@ public class Validator {
         throw new UserNotFoundException();
     }
 
-    public WeatherCard getWeatherCardOrError(long id) throws WeatherCardNotFoundException{
+    public WeatherCard getWeatherCardOrError(String location) throws WeatherCardNotFoundException{
 
-        WeatherCard weatherCard = cardDao.findWeatherCardById(id);
+        WeatherCard weatherCard = cardDao.findWeatherCardByLocation(location);
         if(weatherCard != null){
             return weatherCard;
         }
         throw new WeatherCardNotFoundException();
+    }
+
+    public boolean isWeatherCardExist(String location){
+        return cardDao.findWeatherCardByLocation(location) != null;
     }
 }

@@ -1,12 +1,16 @@
 package com.synoptic.weather.database.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
@@ -16,19 +20,13 @@ public class User {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-    @Column(name = "email", unique = true, nullable = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "first_name", nullable = false)
-    private String firstName;
+    @Column(name = "user_password")
+    private String userPassword;
 
-    @Column(name = "last_name", nullable = false)
-    private String lastName;
-
-    @Column(name = "password")
-    private String password;
-
-    @Column(name = "enabled", nullable = false)
-    private boolean enabled;
+    @Column(name = "user_name")
+    private String username;
 
 }
