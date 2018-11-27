@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class MetcastBuilder {
@@ -24,36 +24,45 @@ public class MetcastBuilder {
     @Value("${WWO_api_kay}")
     private String WWO_api_kay;
 
-    private  final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm a");
+    @Autowired
+    private ResourceBundle rb;
+
+    private  final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd H:m");
 
     @Autowired
     SynopticHttpClient client;
 
     @PostConstruct
     public void print() throws IOException{
-       WeatherCard weatherCard =  createWeatherCard("Kiev");
+       WeatherCard weatherCard =  createWeatherCard(rb.getString("city"));
        weatherCard.getWeatherUnits().forEach(weatherUnit -> System.out.println(weatherUnit));
     }
 
     public WeatherCard createWeatherCard(String location) throws IOException {
 
-        Map<String, JSONArray> jsonObjectsMap = client.selectDataFromJSON(WWO_url + location + WWO_api_kay);
-        String weatherTime = jsonObjectsMap.keySet().stream().findFirst().get();
-        LocalDateTime weatherDateTime = LocalDateTime.parse(LocalDateTime.now().format(formatter), formatter);
-
-        JSONObject weatherObjJSON = jsonObjectsMap.remove(weatherTime).getJSONObject(0);
-        WeatherUnit unit = buildWeatherUnit(weatherObjJSON, weatherDateTime, "temp_C");
-
-        WeatherCard weatherCard = WeatherCard.builder().weatherUnits(new ArrayList<>()).build();
-        weatherCard.getWeatherUnits().add(unit);
-
-       return putWeatherUnitsInto(weatherCard, jsonObjectsMap);
+        Map<String, JSONArray> jsonObjectsMap = selectDataFromJSON(WWO_url + location + WWO_api_kay);
+        JSONObject weatherObjJSON = jsonObjectsMap.remove(jsonObjectsMap.keySet().stream().findFirst().get()).getJSONObject(0);
+        WeatherUnit unit = buildWeatherUnit(weatherObjJSON, formatDateTime(LocalDateTime.now()));
+        return putWeatherUnitsInto(WeatherCard.builder().weatherUnits(new ArrayList<>(Collections.singletonList(unit))).build(), jsonObjectsMap);
     }
 
-    private WeatherUnit buildWeatherUnit(JSONObject weatherObjJSON, LocalDateTime dateTime, String tempC){
+    public Map<String, JSONArray> selectDataFromJSON(String url) throws IOException {
+        JSONObject jsonObject = new JSONObject(client.findWeatherData(url));
+        jsonObject = jsonObject.getJSONObject("data");
+        Map<String, JSONArray> map = new LinkedHashMap<>();
+        map.put(jsonObject.getJSONArray("current_condition").getJSONObject(0).getString("observation_time"), jsonObject.getJSONArray("current_condition"));
+        JSONArray jsonArray = jsonObject.getJSONArray("weather");
+        for(int i = 1; i <= 3; i++ ) {
+            map.put(jsonArray.getJSONObject(i).getString("date"), jsonArray.getJSONObject(i).getJSONArray("hourly"));
+        }
+        return map;
+    }
+
+    private WeatherUnit buildWeatherUnit(JSONObject weatherObjJSON, LocalDateTime dateTime){
+
         return  WeatherUnit.builder().dateTime(dateTime)
                 .weatherDesc(weatherObjJSON.getJSONArray("weatherDesc").getJSONObject(0).getString("value"))
-                .tempC(weatherObjJSON.getInt(tempC))
+                .tempC(dateTime.isAfter(formatDateTime(LocalDateTime.now())) ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
                 .precipMM(weatherObjJSON.getFloat("precipMM"))
                 .pressure(weatherObjJSON.getInt("pressure"))
                 .humidity(weatherObjJSON.getInt("humidity"))
@@ -63,15 +72,23 @@ public class MetcastBuilder {
     }
 
     public WeatherCard putWeatherUnitsInto(WeatherCard weatherCard, Map<String, JSONArray> jsonObjectsMap){
-        for (Map.Entry<String, JSONArray> entry : jsonObjectsMap.entrySet()) {
-            JSONObject weatherObjJSON = entry.getValue().getJSONObject(0);
-            LocalDateTime weatherDateTime = LocalDateTime.parse(entry.getKey() + " 00:00 AM", formatter);
-            weatherCard.getWeatherUnits().add(buildWeatherUnit(weatherObjJSON, weatherDateTime, "tempC"));
 
-            weatherObjJSON = entry.getValue().getJSONObject(4);
-            weatherDateTime = LocalDateTime.parse(entry.getKey() + weatherObjJSON.getString("time"), formatter);
-            weatherCard.getWeatherUnits().add(buildWeatherUnit(weatherObjJSON, weatherDateTime, "tempC"));
+        for (Map.Entry<String, JSONArray> entry : jsonObjectsMap.entrySet()) {
+            JSONObject jsonObject = entry.getValue().getJSONObject(0);
+            weatherCard.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject, entry.getKey())));
+            jsonObject = entry.getValue().getJSONObject(4);
+            weatherCard.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject, entry.getKey())));
         }
         return weatherCard;
+    }
+
+    private LocalDateTime parseStringToDateTime(JSONObject jsonObj, String date){
+
+        int time = Integer.parseInt(jsonObj.getString("time"));
+       return LocalDateTime.parse(date + " " + time/100 + ":" + time%100, formatter);
+    }
+
+    private LocalDateTime formatDateTime(LocalDateTime dateTime){
+        return LocalDateTime.parse(dateTime.format(formatter), formatter);
     }
 }
