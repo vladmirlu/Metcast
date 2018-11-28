@@ -2,7 +2,8 @@ package com.synoptic.weather.api;
 
 import com.synoptic.weather.database.dao.WeatherCardDao;
 import com.synoptic.weather.database.dao.WeatherUnitDao;
-import com.synoptic.weather.database.dto.WeatherCardDto;
+import com.synoptic.weather.database.dto.UserDTO;
+import com.synoptic.weather.database.dto.WeatherCardDTO;
 import com.synoptic.weather.database.entity.User;
 import com.synoptic.weather.database.entity.WeatherCard;
 import com.synoptic.weather.database.entity.WeatherUnit;
@@ -14,10 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,29 +35,11 @@ public class SynopticService {
     @Autowired
     private MetcastBuilder metcastBuilder;
 
-    /*@PostConstruct
-    public void print() throws Exception {
-        String location = "Kiev";
-        if (validator.isWeatherCardExist(location)) {
-            WeatherCard weatherCard = cardDao.findWeatherCardByLocation(location);
-            List<WeatherUnit> units = weatherCard.getWeatherUnits();
-            weatherCard = metcastBuilder.fillWeatherCard(weatherCard);
-            unitDao.saveAll(weatherCard.getWeatherUnits());
-            cardDao.save(weatherCard);
-            unitDao.deleteAll(units);
-        } else {
-            WeatherCard weatherCard = metcastBuilder.fillWeatherCard(WeatherCard.builder().location(location).build());
-            unitDao.saveAll(weatherCard.getWeatherUnits());
-            cardDao.save(weatherCard);
-        }
-    }*/
-
-
-    public ResponseEntity<WeatherCard> saveWeatherCard(WeatherCardDto cardDto) {
+    public ResponseEntity<WeatherCardDTO> saveWeatherCard(WeatherCardDTO cardDto) {
 
         WeatherCard weatherCard;
         try {
-            User user = validator.getUserOrExit(cardDto.getUser().getEmail());
+            User user = validator.getUserOrExit(cardDto.getUserDTO().getEmail());
             weatherCard = updateOrCreateWeatherCard(cardDto, user);
         } catch (UserNotFoundException e) {
             e.printStackTrace();
@@ -67,19 +48,30 @@ public class SynopticService {
             io.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.ok(weatherCard);
+        return ResponseEntity.ok(weatherCardToDTO(weatherCard));
     }
 
-    private WeatherCard updateOrCreateWeatherCard(WeatherCardDto cardDto, User user) throws IOException {
+    private WeatherCardDTO weatherCardToDTO(WeatherCard weatherCard){
+
+        return WeatherCardDTO.builder().location(weatherCard.getLocation())
+                .weatherUnits(weatherCard.getWeatherUnits())
+                .userDTO(userToDTO(weatherCard.getUser())).build();
+    }
+
+    private UserDTO userToDTO(User user){
+        return UserDTO.builder().email(user.getEmail()).build();
+    }
+
+    private WeatherCard updateOrCreateWeatherCard(WeatherCardDTO cardDto, User user) throws IOException {
 
         if (validator.isWeatherCardExist(cardDto.getLocation())) {
-            WeatherCard weatherCard = cardDao.findWeatherCardByLocation(cardDto.getLocation());
-            List<WeatherUnit> units = weatherCard.getWeatherUnits();
-            weatherCard = metcastBuilder.fillWeatherCard(weatherCard);
-            unitDao.saveAll(weatherCard.getWeatherUnits());
-            cardDao.save(weatherCard);
+            WeatherCard card = cardDao.findWeatherCardByLocation(cardDto.getLocation());
+            List<WeatherUnit> units = card.getWeatherUnits();
+            card = metcastBuilder.fillWeatherCard(card);
+            unitDao.saveAll(card.getWeatherUnits());
             unitDao.deleteAll(units);
-            return weatherCard;
+            cardDao.save(card);
+            return card;
         } else {
             WeatherCard weatherCard = metcastBuilder.fillWeatherCard(WeatherCard.builder().location(cardDto.getLocation()).user(user).build());
             unitDao.saveAll(weatherCard.getWeatherUnits());
@@ -88,15 +80,12 @@ public class SynopticService {
         }
     }
 
-    public ResponseEntity<Set<WeatherCard>> saveWeatherCardList(List<WeatherCardDto> cardDtos) {
-
-        Set<WeatherCard> weatherCards = new HashSet<>();
+    public ResponseEntity<Set<WeatherCardDTO>> saveWeatherCardList(Set<WeatherCardDTO> cardDTOs) {
         try {
-            User user = validator.getUserOrExit(cardDtos.get(0).getUser().getEmail());
-            for (WeatherCardDto cardDto : cardDtos) {
-                weatherCards.add(updateOrCreateWeatherCard(cardDto, user));
+            User user = validator.getUserOrExit(cardDTOs.iterator().next().getUserDTO().getEmail());
+            for (WeatherCardDTO cardDTO : cardDTOs) {
+                cardDTO = weatherCardToDTO(updateOrCreateWeatherCard(cardDTO, user));
             }
-            cardDao.saveAll(weatherCards);
         } catch (UserNotFoundException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -104,20 +93,22 @@ public class SynopticService {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.ok(weatherCards);
+        return ResponseEntity.ok(cardDTOs);
     }
 
-    public ResponseEntity<List<WeatherCard>> findUserAllWeatherCards(String email) {
+    public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String email) {
         try {
-            User user = validator.getUserOrExit(email);
-            return ResponseEntity.ok(cardDao.findAllByUser(user));
+            List<WeatherCard> cards = cardDao.findAllByUser(validator.getUserOrExit(email));
+            List<WeatherCardDTO> cardDTOs = new ArrayList<>();
+            cards.forEach(card-> cardDTOs.add(weatherCardToDTO(card)));
+            return ResponseEntity.ok(cardDTOs);
         } catch (UserNotFoundException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    public ResponseEntity deleteWeatherCard(WeatherCardDto cardDto) {
+    public ResponseEntity deleteWeatherCard(WeatherCardDTO cardDto) {
         try {
             WeatherCard weatherCard = validator.getWeatherCardOrError(cardDto.getLocation());
             cardDao.delete(weatherCard);

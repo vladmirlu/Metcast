@@ -1,6 +1,5 @@
 package com.synoptic.weather.database.dto;
 
-import com.synoptic.weather.database.entity.User;
 import com.synoptic.weather.database.entity.WeatherUnit;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +8,11 @@ import java.util.List;
 
 @Data
 @Builder
-public class WeatherCardDto {
+public class WeatherCardDTO {
 
     private String location;
 
     private List<WeatherUnit> weatherUnits;
 
-    private User user;
+    private UserDTO userDTO;
 }
