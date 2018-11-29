@@ -15,18 +15,22 @@ public class AuthService implements UserDetailsService {
     @Autowired
     UserDao userDao;
 
+    /**
+     *Lets login with either username or email
+     *
+     * */
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String usernameOrEmail)
-            throws UsernameNotFoundException {
-        // Let people login with either username or email
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         User user = userDao.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email : " + usernameOrEmail));
 
         return UserPrincipal.create(user);
     }
 
-    // This method is used by JwtAuthenticationFilter
+    /** This method is used by JwtAuthenticationFilter
+     *
+     * */
     @Transactional
     public UserDetails loadUserById(Long id) {
         User user = userDao.findById(id).orElseThrow(
@@ -35,25 +39,6 @@ public class AuthService implements UserDetailsService {
 
         return UserPrincipal.create(user);
     }
+
 }
 
-
-
-
-/*@Service
-public class AuthenticationService implements UserDetailsService {
-
-    @Autowired
-    private UserDao userDao;
-
-    @Transactional(readOnly = true)
-    @Override
-    public UserDetails loadUserByUsername(final String email) throws UsernameNotFoundException {
-        User user = userDao.findByEmail(email);
-        return buildUserForAuthentication(user, Collections.singletonList(new SimpleGrantedAuthority("USER")));
-    }
-
-    org.springframework.security.core.userdetails.User buildUserForAuthentication(User user, List<GrantedAuthority> authorities) {
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), true, true, true, true, authorities);
-    }
-}*/

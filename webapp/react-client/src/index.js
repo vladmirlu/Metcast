@@ -1,9 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter } from 'react-router-dom'
-import Routes from './routes'
+import './index.css';
+import App from './components/App';
+import registerServiceWorker from './registerServiceWorker';
+import { BrowserRouter as Router } from 'react-router-dom';
+
 ReactDOM.render(
-  <HashRouter>
-    <Routes />
-  </HashRouter>, document.getElementById('root')
+    <Router>
+        <App />
+    </Router>,
+    document.getElementById('root')
 );
+
+registerServiceWorker();
