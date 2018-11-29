@@ -18,7 +18,7 @@ public class WeatherUnit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", unique = true, nullable = false)
+    @Column
     private Long id;
 
     @Column

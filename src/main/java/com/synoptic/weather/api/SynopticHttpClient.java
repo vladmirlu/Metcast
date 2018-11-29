@@ -20,21 +20,22 @@ import java.util.*;
 @Component
 public class SynopticHttpClient {
 
-    public String findWeatherData(String url) throws IOException{
-
+    public String findWeatherData(String url) {
+        String entityStr = "";
         try {
             CloseableHttpClient client = buildHttpClient();
             HttpResponse response = client.execute(new HttpGet(url));
             if (response.getEntity() != null) {
-                String entityStr = EntityUtils.toString(response.getEntity(), "UTF-8");
+                entityStr = EntityUtils.toString(response.getEntity(), "UTF-8");
                 EntityUtils.consume(response.getEntity());
                 client.close();
-                return entityStr;
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
+        } catch (IOException io){
+            io.printStackTrace();
         }
-        throw new HttpResponseException(404, "Response Entity not found");
+        return entityStr;
     }
 
     private CloseableHttpClient buildHttpClient() {

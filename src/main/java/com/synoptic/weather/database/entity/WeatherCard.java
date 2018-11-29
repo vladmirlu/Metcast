@@ -19,16 +19,16 @@ public class WeatherCard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", unique = true, nullable = false)
+    @Column
     private Long id;
 
-    @Column(name = "location", unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String location;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     private List <WeatherUnit> weatherUnits;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     private User user;
 
 }

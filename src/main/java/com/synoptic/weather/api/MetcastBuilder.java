@@ -35,7 +35,7 @@ public class MetcastBuilder {
     @Autowired
     SynopticHttpClient client;
 
-    public WeatherCard fillWeatherCard(WeatherCard weatherCard) throws IOException {
+    public WeatherCard fillWeatherCard(WeatherCard weatherCard)  {
 
         Map<String, JSONArray> jsonObjectsMap = selectDataFromJSON(WWO_url + weatherCard.getLocation() + WWO_api_kay + WWO_days_forecast);
         JSONObject weatherObjJSON = jsonObjectsMap.remove(jsonObjectsMap.keySet().stream().findFirst().get()).getJSONObject(0);
@@ -44,7 +44,7 @@ public class MetcastBuilder {
         return putWeatherUnitsInto(weatherCard, jsonObjectsMap);
     }
 
-    public Map<String, JSONArray> selectDataFromJSON(String url) throws IOException {
+    public Map<String, JSONArray> selectDataFromJSON(String url) {
         JSONObject jsonObject = new JSONObject(client.findWeatherData(url));
         jsonObject = jsonObject.getJSONObject("data");
         Map<String, JSONArray> map = new LinkedHashMap<>();
