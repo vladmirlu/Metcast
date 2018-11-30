@@ -1,17 +1,17 @@
-.polls-container {
+.cards-container {
     max-width: 600px;
     margin: 0 auto;    
     margin-top: 20px; 
 }
 
-.poll-content {
+.card-content {
     margin-bottom: 30px;
     padding: 20px 15px 20px 15px;
     letter-spacing: .01em;
     box-shadow: 0 2px 2px 0 rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08);
 }
 
-.poll-question {
+.card-question {
     font-weight: 500;
     font-size: 21px;
     color: rgba(0, 0, 0, 0.85);
@@ -19,21 +19,21 @@
 }
 
 @media (max-width: 768px) {
-    .poll-question {
+    .card-question {
         font-size: 18px;
     }
 }
 
-.poll-choices {
+.card-choices {
     margin-top: 5px;
     margin-bottom: 15px;
 }
 
-.poll-choice-radio-group {
+.card-choice-radio-group {
     display: block;
 }
 
-.poll-choice-radio {
+.card-choice-radio {
     display: block;
     line-height: 1.7;
     font-size: 15px;
@@ -46,32 +46,13 @@
     color: rgba(0, 0, 0, 0.75);
 }
 
-.vote-button {
-    border-radius: 15px;
-    margin-right: 15px;
-    color: #40a9ff;
-    border-color: #40a9ff;
-}
-
-.vote-button:hover {
-    color: #1890ff;
-    border-color: #1890ff;    
-}
-
-.vote-button[disabled], .vote-button[disabled]:hover, .vote-button[disabled]:focus {
-    color: #40a9ff;
-    border-color: #40a9ff;
-    background-color: #fff;
-    opacity: 0.4;
-}
-
 .separator {
     margin-left: 10px;
     margin-right: 10px;
     color: #8899A6;
 }
 
-.cv-poll-choice {
+.cv-card-choice {
     position: relative;
     margin-bottom: 8px;
 }
@@ -126,25 +107,25 @@
     background-color: #77C7F7;
 }
 
-.poll-creator-info {
+.card-creator-info {
     margin-left: 58px;
     margin-bottom: 10px;
     height: 58px;
 }
 
-.poll-creator-info .creator-link {
+.card-creator-info .creator-link {
     display: block;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
 }
 
-.poll-creator-info .creator-link:hover .poll-creator-name {
+.card-creator-info .creator-link:hover {
     color: #1890ff;
     text-decoration: underline;
 }
 
-.poll-creator-avatar {
+.card-creator-avatar {
     float: left;
     margin-top: 3px;
     margin-left: -58px;
@@ -155,18 +136,9 @@
     border-radius: 24px;    
 }
 
-.poll-creator-avatar > * {
+.card-creator-avatar > * {
     line-height: 48px;
     font-size: 18px;
-}
-
-.poll-creator-name {
-    font-size: 16px;
-    font-weight: 500;
-    color: rgba(0, 0, 0, 0.85);
-    margin-top: 4px;
-    display: inline-block;    
-    margin-right: 8px;
 }
 
 .poll-creator-username {
@@ -180,4 +152,55 @@
     color: #657786;
     font-size: 13px;
     margin-top: 2px;
+}
+
+/**********************************************************************************/
+
+.new-card-container {
+    max-width: 520px;
+    margin: 0 auto;
+    margin-top: 40px;
+}
+
+.create-poll-form-button {
+    width: 100%;
+}
+
+.create-poll-form-button[disabled], .create-poll-form-button[disabled]:hover, .create-poll-form-button[disabled]:focus {
+    opacity: 0.6;
+    color: #fff;
+    background-color: #1890ff;
+    border-color: #1890ff;
+}
+
+
+.dynamic-delete-button {
+    cursor: pointer;
+    position: relative;
+    top: 4px;
+    font-size: 24px;
+    color: #999;
+    transition: all .3s;
+}
+
+.optional-choice {
+    width: calc(100% - 35px);
+    margin-right: 8px;
+}
+
+.dynamic-delete-button:hover {
+    color: #777;
+}
+
+.dynamic-delete-button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.card-form-row {
+    margin-bottom: 20px;
+}
+
+.card-form-row input, .card-form-row textarea {
+    margin-bottom: 4px;
 }

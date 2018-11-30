@@ -14,4 +14,6 @@ public class UserDTO {
     private String email;
 
     private String userPassword;
+
+    private long cardsCount;
 }

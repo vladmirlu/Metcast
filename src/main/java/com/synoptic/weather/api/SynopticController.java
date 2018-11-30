@@ -15,6 +15,7 @@ import java.util.Set;
 @CrossOrigin(origins = "http://localhost:3000")
 public class SynopticController {
 
+
     @Autowired
     private SynopticService synopticService;
 

@@ -4,6 +4,7 @@ import com.synoptic.weather.authentication.UserPrincipal;
 import com.synoptic.weather.authentication.payload.UserIdentityAvailability;
 import com.synoptic.weather.authentication.security.CurrentUser;
 import com.synoptic.weather.database.dao.UserDao;
+import com.synoptic.weather.database.dao.WeatherCardDao;
 import com.synoptic.weather.database.dto.UserDTO;
 import com.synoptic.weather.database.entity.User;
 import com.synoptic.weather.exception.ResourceNotFoundException;
@@ -19,6 +20,8 @@ public class UserController {
 
     @Autowired
     private UserDao userDao;
+
+    private WeatherCardDao weatherCardDao;
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 

@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
-import { getUserProfile } from '../../util/APIUtils';
-import { Avatar, Tabs } from 'antd';
+import {createWeatherCard, getUserProfile} from '../../util/APIUtils';
+import {Avatar, Button, Form, Input, notification, Tabs} from 'antd';
 import { getAvatarColor } from '../../util/Colors';
-import { formatDate } from '../../util/Helpers';
 import LoadingIndicator  from '../../common/LoadingIndicator';
 import './Profile.css';
 import NotFound from '../../common/NotFound';
 import ServerError from '../../common/ServerError';
+import WeatherCardList from "../../weather/WeatherCardList";
+
+const FormItem = Form.Item;
+const { TextArea } = Input;
 
 const TabPane = Tabs.TabPane;
 
@@ -16,7 +19,8 @@ class Profile extends Component {
         this.state = {
             user: null,
             isLoading: false
-        }
+        };
+
         this.loadUserProfile = this.loadUserProfile.bind(this);
     }
 
@@ -57,6 +61,37 @@ class Profile extends Component {
         }        
     }
 
+    handleSubmit(event) {
+        event.preventDefault();
+        const cardData = {
+            location: this.state.location,
+            userDTO: {
+               email: this.state.user.email
+            }
+        };
+
+        createWeatherCard(cardData)
+            .then(response => {
+                this.props.history.push("/");
+            }).catch(error => {
+            if(error.status === 401) {
+                this.props.handleLogout('/login', 'error', 'You have been logged out. Please login create poll.');
+            } else {
+                notification.error({
+                    message: 'Polling App',
+                    description: error.message || 'Sorry! Something went wrong. Please try again!'
+                });
+            }
+        });
+    };
+
+    handleLocationChange(event) {
+        const value = event.target.value;
+        this.setState({
+            location: value
+        });
+    }
+
     render() {
         if(this.state.isLoading) {
             return <LoadingIndicator />;
@@ -76,7 +111,7 @@ class Profile extends Component {
 
         return (
             <div className="profile">
-                { 
+                {
                     this.state.user ? (
                         <div className="user-profile">
                             <div className="user-details">
@@ -96,14 +131,33 @@ class Profile extends Component {
                                     tabBarStyle={tabBarStyle}
                                     size="large"
                                     className="profile-tabs">
-                                    {/*<TabPane tab={`${this.state.user.pollCount} Polls`} key="1">
-                                        <PollList username={this.props.match.params.username} type="USER_CREATED_POLLS" />
+                                    <TabPane tab={`${this.state.user.username} Weather Cards`} key="1">
+                                        <WeatherCardList username={this.props.match.params.username} />
                                     </TabPane>
-                                    <TabPane tab={`${this.state.user.voteCount} Votes`}  key="2">
-                                        <PollList username={this.props.match.params.username} type="USER_VOTED_POLLS" />
-                                    </TabPane>*/}
                                 </Tabs>
                             </div>
+
+                            <div className="new-poll-content">
+                                <Form onSubmit={this.handleSubmit} className="create-poll-form">
+                                    <FormItem className="card-form-row">
+                        <TextArea
+                            placeholder="Enter the location"
+                            style = {{ fontSize: '16px' }}
+                            autosize={{ minRows: 3, maxRows: 6 }}
+                            name = "location"
+                            value = {this.state.location}
+                            onChange = {this.handleLocationChange} />
+                                    </FormItem>
+
+                                    <FormItem className="card-form-row">
+                                        <Button type="primary"
+                                                htmlType="submit"
+                                                size="large"
+                                                className="create-poll-form-button">Create Poll</Button>
+                                    </FormItem>
+                                </Form>
+                            </div>
+
                         </div>  
                     ): null               
                 }

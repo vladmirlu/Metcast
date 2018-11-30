@@ -1,10 +1,10 @@
-.no-polls-found {
+.no-cards-found {
     font-size: 20px;
     text-align: center;
     padding: 20px;    
 }
 
-.load-more-polls {
+.load-more-cards {
     text-align: center;
     margin-bottom: 40px;    
 }
