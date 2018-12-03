@@ -9,14 +9,13 @@ import {
 import { getCurrentUser } from './util/APIUtils';
 import { ACCESS_TOKEN } from './constants';
 
-import PollList from './weather/WeatherCardList';
+import WeatherCardList from './weather/WeatherCardList';
 import Login from './user/login/Login';
 import Signup from './user/signup/Signup';
 import Profile from './user/profile/Profile';
 import AppHeader from './common/AppHeader';
 import NotFound from './common/NotFound';
 import LoadingIndicator from './common/LoadingIndicator';
-
 import { Layout, notification } from 'antd';
 const { Content } = Layout;
 
@@ -100,7 +99,7 @@ class App extends Component {
             <div className="container">
               <Switch>      
                 <Route exact path="/" 
-                  render={(props) => <PollList isAuthenticated={this.state.isAuthenticated} 
+                  render={(props) => <WeatherCardList isAuthenticated={this.state.isAuthenticated}
                       currentUser={this.state.currentUser} handleLogout={this.handleLogout} {...props} />}>
                 </Route>
                 <Route path="/login" render={(props) => <Login onLogin={this.handleLogin} {...props} />} />
@@ -108,7 +107,6 @@ class App extends Component {
                 <Route path="/users/:username"
                   render={(props) => <Profile isAuthenticated={this.state.isAuthenticated} currentUser={this.state.currentUser} {...props}  />}>
                 </Route>
-
                 <Route component={NotFound} />
               </Switch>
             </div>

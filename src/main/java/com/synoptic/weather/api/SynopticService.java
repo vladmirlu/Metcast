@@ -29,49 +29,43 @@ public class SynopticService {
     @Autowired
     private MetcastBuilder metcastBuilder;
 
-    public ResponseEntity<WeatherCardDTO> saveWeatherCard(WeatherCardDTO cardDTO) {
+    public ResponseEntity<List<Long>> saveWeatherCardList(Set<String> locations, String username) {
 
-        User user = modelManager.getUserOrExit(cardDTO.getUserDTO().getEmail());
-        return ResponseEntity.ok(modelManager.weatherCardToDTO(updateOrCreateWeatherCard(cardDTO, user)));
-    }
-
-    public ResponseEntity<Set<WeatherCardDTO>> saveWeatherCardList(Set<WeatherCardDTO> cardDTOs) {
-
-        User user = modelManager.getUserOrExit(cardDTOs.iterator().next().getUserDTO().getEmail());
-        for (WeatherCardDTO cardDTO : cardDTOs) {
-            cardDTOs.remove(cardDTO);
-            cardDTOs.add(modelManager.weatherCardToDTO(updateOrCreateWeatherCard(cardDTO, user)));
+        User user = modelManager.getUserOrExit(username);
+        List<Long> cardIds = new ArrayList<>();
+        for (String location : locations) {
+            cardIds.add(updateOrCreateWeatherCard(location, user).getId());
         }
-        return ResponseEntity.ok(cardDTOs);
+        return ResponseEntity.ok(cardIds);
     }
 
-    private WeatherCard updateOrCreateWeatherCard(WeatherCardDTO cardDto, User user) {
+    private WeatherCard updateOrCreateWeatherCard(String location, User user) {
 
-        WeatherCard card = cardDao.findWeatherCardByLocation(cardDto.getLocation());
+        WeatherCard card = cardDao.findWeatherCardByLocation(location);
         if (card != null) {
             unitDao.deleteAll(card.getWeatherUnits());
             card = metcastBuilder.fillWeatherCard(card);
 
         } else {
-            card = metcastBuilder.fillWeatherCard(WeatherCard.builder().location(cardDto.getLocation()).user(user).build());
+            card = metcastBuilder.fillWeatherCard(WeatherCard.builder().location(location).user(user).build());
         }
         unitDao.saveAll(card.getWeatherUnits());
         cardDao.save(card);
         return card;
     }
 
-    public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String email) {
+    public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String username) {
 
         List<WeatherCardDTO> cardDTOs = new ArrayList<>();
-        cardDao.findAllByUser(modelManager.getUserOrExit(email)).forEach(card -> cardDTOs.add(modelManager.weatherCardToDTO(card)));
+        cardDao.findAllByUser(modelManager.getUserOrExit(username)).forEach(card -> cardDTOs.add(modelManager.weatherCardToDTO(card)));
         return ResponseEntity.ok(cardDTOs);
     }
 
-    public ResponseEntity deleteWeatherCard(WeatherCardDTO cardDto) {
+    public ResponseEntity<WeatherCardDTO> deleteWeatherCard(String location) {
 
-        WeatherCard weatherCard = modelManager.getWeatherCardOrError(cardDto.getLocation());
+        WeatherCard weatherCard = modelManager.getWeatherCardOrError(location);
         unitDao.deleteAll(weatherCard.getWeatherUnits());
         cardDao.delete(weatherCard);
-        return new ResponseEntity(HttpStatus.OK);
+        return ResponseEntity.ok(modelManager.weatherCardToDTO(weatherCard));
     }
 }

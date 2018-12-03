@@ -1,4 +1,4 @@
-import { API_BASE_URL, WEATHER_CARD_LIST_SIZE, ACCESS_TOKEN } from '../constants';
+import { API_BASE_URL, ACCESS_TOKEN } from '../constants';
 
 const request = (options) => {
     const headers = new Headers({
@@ -22,14 +22,6 @@ const request = (options) => {
         })
     );
 };
-
-export function createWeatherCard(cardData) {
-    return request({
-        url: API_BASE_URL + "/weather/card/add",
-        method: 'POST',
-        body: JSON.stringify(cardData)
-    });
-}
 
 export function login(loginRequest) {
     return request({
@@ -80,10 +72,26 @@ export function getUserProfile(username) {
     });
 }
 
-export function getUserCreatedWeatherCards(email) {
+export function getUserCreatedWeatherCards(username) {
 
     return request({
-        url: API_BASE_URL + "api/weather/card/get-all/" + email,
+        url: API_BASE_URL + "/weather/cards/get-all/" + username,
         method: 'GET'
+    });
+}
+
+export function addWeatherCardList(state) {
+    return request({
+        url: API_BASE_URL + "/weather/cards/add/" + state.username,
+        method: 'POST',
+        body: JSON.stringify(state.locations)
+    });
+}
+
+export function deleteWeatherCard(location) {
+
+    return request({
+        url: API_BASE_URL + "/weather/cards/delete/" + location,
+        method: 'DELETE'
     });
 }

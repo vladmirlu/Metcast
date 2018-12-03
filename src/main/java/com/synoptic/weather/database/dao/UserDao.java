@@ -10,11 +10,7 @@ import java.util.Optional;
 @Transactional
 public interface UserDao extends CrudRepository<User, Long> {
 
-    User findByEmail(String email);
-
     Optional<User> findByUsernameOrEmail(String username, String email);
-
-    List<User> findByIdIn(List<Long> userIds);
 
     Optional<User> findByUsername(String username);
 

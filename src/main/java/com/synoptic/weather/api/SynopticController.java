@@ -10,32 +10,26 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("api/weather/card/")
+@RequestMapping("api/weather/cards/")
 @Transactional
 @CrossOrigin(origins = "http://localhost:3000")
 public class SynopticController {
 
-
     @Autowired
     private SynopticService synopticService;
 
-    @RequestMapping(value = "get-all/{email}")
-    public ResponseEntity<List<WeatherCardDTO>> getAllWeatherCard(@PathVariable ("email") String email){
-          return synopticService.findUserAllWeatherCards(email);
+    @RequestMapping(value = "get-all/{username}")
+    public ResponseEntity<List<WeatherCardDTO>> getAllWeatherCard(@PathVariable ("username") String username){
+          return synopticService.findUserAllWeatherCards(username);
     }
 
-    @RequestMapping(value = "add", method = RequestMethod.POST)
-    public ResponseEntity<WeatherCardDTO> addWeatherCard(@RequestBody WeatherCardDTO cardDTO){
-             return synopticService.saveWeatherCard(cardDTO);
+    @RequestMapping(value = "add/{username}", method = RequestMethod.POST)
+    public ResponseEntity<List<Long>> addFewWeatherCards(@PathVariable ("username") String username, @RequestBody Set<String> locations){
+        return synopticService.saveWeatherCardList(locations, username);
     }
 
-    @RequestMapping(value = "add-several", method = RequestMethod.POST)
-    public ResponseEntity<Set<WeatherCardDTO>> addFewWeatherCards(@RequestBody Set<WeatherCardDTO> cardDTOs){
-        return synopticService.saveWeatherCardList(cardDTOs);
-    }
-
-    @RequestMapping(value = "delete", method = RequestMethod.DELETE)
-    public ResponseEntity deleteCard(@RequestBody WeatherCardDTO cardDTO){
-        return synopticService.deleteWeatherCard(cardDTO);
+    @RequestMapping(value = "delete/{location}", method = RequestMethod.DELETE)
+    public ResponseEntity<WeatherCardDTO> deleteCard(@PathVariable("location") String location){
+        return synopticService.deleteWeatherCard(location);
     }
 }

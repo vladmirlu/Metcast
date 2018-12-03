@@ -6,6 +6,7 @@ import com.synoptic.weather.database.dto.UserDTO;
 import com.synoptic.weather.database.dto.WeatherCardDTO;
 import com.synoptic.weather.database.entity.User;
 import com.synoptic.weather.database.entity.WeatherCard;
+import com.synoptic.weather.exception.ResourceNotFoundException;
 import com.synoptic.weather.exception.UserNotFoundException;
 import com.synoptic.weather.exception.WeatherCardNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,8 @@ public class ModelManager {
     @Autowired
     private WeatherCardDao cardDao;
 
-    public User getUserOrExit(String email) {
-        User user = userDao.findByEmail(email);
-        if (user == null) {
-            throw new UserNotFoundException();
-        }
+    public User getUserOrExit(String username) {
+        User user = userDao.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
         return user;
     }
 
@@ -39,7 +37,7 @@ public class ModelManager {
 
     public WeatherCardDTO weatherCardToDTO(WeatherCard weatherCard){
 
-        return WeatherCardDTO.builder().location(weatherCard.getLocation())
+        return WeatherCardDTO.builder().id(weatherCard.getId()).location(weatherCard.getLocation())
                 .weatherUnits(weatherCard.getWeatherUnits())
                 .userDTO(userToDTO(weatherCard.getUser())).build();
     }

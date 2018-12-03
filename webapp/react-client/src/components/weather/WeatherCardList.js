@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
-import {getUserCreatedWeatherCards} from '../util/APIUtils';
+import {deleteWeatherCard, getUserCreatedWeatherCards} from '../util/APIUtils';
 import WeatherCard from './WeatherCard';
-import LoadingIndicator from '../common/LoadingIndicator';
 import {Button, Icon, notification} from 'antd';
 import {Switch, withRouter} from 'react-router-dom';
 import './WeatherCardList.css';
@@ -11,79 +10,89 @@ class WeatherCardList extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            weatherCards: [],
-            isLoading: false
+            weatherCards: []
         };
-        this.loadWeatherCards = this.loadWeatherCards.bind(this);
+            this.loadWeatherCards = this.loadWeatherCards.bind(this);
+            this.loadWeatherCards();
+    }
+
+   /* componentDidMount() {
+        this.loadWeatherCards();
+    }*/
+    componentDidUpdate(nextProps) {
+        if (this.props.cardIds !== nextProps.cardIds) {
+            this.loadWeatherCards();
+        }
     }
 
     loadWeatherCards() {
-        console.log(this.props.username);
-        let promise;
-        if (this.props.username) {
-            promise = getUserCreatedWeatherCards(this.props.username);
+
+        if (this.props.user) {
+            getUserCreatedWeatherCards(this.props.user.username)
+                .then(response => {
+                    this.setState({
+                        weatherCards: response
+                    });
+                }).catch(error => {
+                notification.error({
+                    message: 'Metcast App',
+                    description: 'Error! Could not fetch weather cards'
+                });
+            });
         } else {
-            alert(this.props.username)
+            notification.error({
+                message: 'Metcast App',
+                description: 'Error! Could not define current user'
+            });
         }
-        if (!promise) {
-            return;
-        }
-        this.setState({
-            isLoading: true
-        });
-
-        promise
-            .then(response => {
-                const cards = this.state.weatherCards.slice();
-
-                this.setState({
-                    weatherCards: cards.concat(response.content),
-                    isLoading: false
-                })
-            }).catch(error => {
-            this.setState({
-                isLoading: false
-            })
-        });
-
     }
+
+    handleCardDelete(event, cardIndex) {
+
+        deleteWeatherCard(event.target.value)
+            .then(response => {
+                notification.success({
+                    message: 'Metcast App',
+                    description: 'The new weather card for location ' + response.location + ' deleted successfully'
+                });
+                this.state.weatherCards.splice(cardIndex, 1);
+                this.setState({
+                    weatherCards: this.state.weatherCards
+                });
+            }).catch(error => {
+            if (error.status === 401) {
+                this.props.handleLogout('/login', 'error', 'You have been logged out. Please login to delete current card.');
+            } else {
+                notification.error({
+                    message: 'Metcast App',
+                    description: error.message || 'Sorry! Something went wrong. Please try again!'
+                });
+            }
+        });
+    }
+
 
     render() {
         const weatherCardViews = [];
-        this.state.weatherCards.forEach((card) => {
-            weatherCardViews.push(<WeatherCard
-                key={card.id}
-                card={card}
-                />)
+        this.state.weatherCards.forEach((card, cardIndex) => {
+            weatherCardViews.push(<WeatherCard key={card.id} card={card}
+                                               handleCardDelete={(event) => this.handleCardDelete(event, cardIndex)}
+            />)
         });
 
         return (
+
             <div className="cards-container">
                 {weatherCardViews}
                 {
-                    !this.state.isLoading && this.state.weatherCards.length === 0 ? (
+                    this.state.weatherCards.length === 0 ? (
                         <div className="no-cards-found">
-                            <span>No Polls Found.</span>
+                            <span>No Weather Card Found.</span>
                         </div>
                     ) : null
-                }
-                {
-                    !this.state.isLoading ? (
-                        <div className="load-more-cards">
-                           {/* <Button type="dashed" onClick={this.loadWeatherCards()} disabled={this.state.isLoading}>
-                                <Icon type="plus"/> Load more
-                            </Button>*/}
-
-                                {/*<PrivateRoute authenticated={this.state.isAuthenticated} path="/weather/card/add" component={NewCard} handleLogout={this.handleLogout} />*/}
-                        </div>
-
-                    ) : null
-                }
-                {
-                    this.state.isLoading ?
-                        <LoadingIndicator/> : null
                 }
             </div>
+
         );
     }
 }

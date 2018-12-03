@@ -10,6 +10,8 @@ import java.util.List;
 @Builder
 public class WeatherCardDTO {
 
+    private long id;
+
     private String location;
 
     private List<WeatherUnit> weatherUnits;

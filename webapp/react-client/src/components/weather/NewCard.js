@@ -1,79 +1,91 @@
-import React, { Component } from 'react';
-import { createWeatherCard } from '../util/APIUtils';
-import { Form, Input, Button, notification } from 'antd';
+import React, {Component} from 'react';
+import {addWeatherCardList} from '../util/APIUtils';
+import {Form, Button, notification} from 'antd';
+import LocationInput from "./LocationInput";
+import {Icon} from 'antd';
 const FormItem = Form.Item;
-const { TextArea } = Input;
+
 
 class NewCard extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
-            location: '',
+            locations: [1],
+            username: this.props.user.username
 
-            userDTO: {
-                email: this.state.user.email
-            }
         };
-
-        console.log(this.state.userDTO);
-        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleAddWeatherCard = this.handleAddWeatherCard.bind(this);
     }
 
 
-    handleSubmit(event) {
+    handleAddWeatherCard(event) {
         event.preventDefault();
-        const cardData = {
-            location: this.state.location,
-            userDTO: this.state.userDTO
-        };
 
-        createWeatherCard(cardData)
-        .then(response => {
-            this.props.history.push("/");
-        }).catch(error => {
-            if(error.status === 401) {
-                this.props.handleLogout('/login', 'error', 'You have been logged out. Please login create poll.');    
+        addWeatherCardList(this.state)
+            .then(response => {
+                notification.success({
+                    message: 'Metcast App',
+                    description: 'The new weather card for ' + this.state.locations + ' created successfully'
+                });
+                this.props.setCardIds(response);
+            }).catch(error => {
+            if (error.status === 401) {
+                this.props.handleLogout('/login', 'error', 'You have been logged out. Please login create poll.');
             } else {
                 notification.error({
-                    message: 'Polling App',
+                    message: 'Metcast App',
                     description: error.message || 'Sorry! Something went wrong. Please try again!'
-                });              
+                });
             }
         });
     };
 
-    handleLocationChange(event) {
-        const value = event.target.value;
+    removeField=(event, index)=> {
+        this.state.locations.splice(index, 1) ;
         this.setState({
-            location: value
+            locations: this.state.locations
         });
-    }
+    };
+
+    addMoreLocations = () =>{
+        this.state.locations.push(1);
+        this.setState({
+            locations: this.state.locations
+        });
+    };
 
     render() {
 
+        const locationViews = [];
+        this.state.locations.forEach((field, index) => {
+            locationViews.push(<LocationInput field={field}
+                                              removeField={(event) => this.removeField(event, index)}
+            />)
+        });
+
         return (
             <div className="new-card-container">
-                <h1 className="page-title">Create Poll</h1>
+                <h1 className="page-title">Create weather card</h1>
+                <div className="load-more-polls">
+                    <Button type="dashed" onClick={this.addMoreLocations} disabled={this.state.locations.length > 10}>
+                        <Icon type="plus" /> Add more locations
+                    </Button>
+                </div>
+
                 <div className="new-poll-content">
-                    <Form onSubmit={this.handleSubmit} className="create-poll-form">
-                        <FormItem className="card-form-row">
-                        <TextArea 
-                            placeholder="Enter the location"
-                            style = {{ fontSize: '16px' }} 
-                            autosize={{ minRows: 3, maxRows: 6 }} 
-                            name = "location"
-                            value = {this.state.location}
-                            onChange = {this.handleLocationChange} />
-                        </FormItem>
+                    <Form onSubmit={this.handleAddWeatherCard}>
+
+                        {locationViews}
 
                         <FormItem className="card-form-row">
-                            <Button type="primary" 
-                                htmlType="submit" 
-                                size="large"
-                                className="create-poll-form-button">Create Poll</Button>
+                            <Button type="primary"
+                                    htmlType="submit"
+                                    size="large"
+                                    className="create-poll-form-button">Add weather card</Button>
                         </FormItem>
                     </Form>
-                </div>    
+                </div>
             </div>
         );
     }

@@ -8,6 +8,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Transactional
 public interface WeatherCardDao extends CrudRepository<WeatherCard, Long> {
@@ -15,4 +17,6 @@ public interface WeatherCardDao extends CrudRepository<WeatherCard, Long> {
     List<WeatherCard> findAllByUser(User user);
 
     WeatherCard findWeatherCardByLocation(String location);
+
+    List <WeatherCard> findAllByLocationIn (Set<String> locations);
 }
