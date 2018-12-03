@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './Card.css';
-import {Button, notification} from "antd";
+import {Button} from "antd";
 
 class WeatherCard extends Component {
     constructor(props) {
@@ -18,7 +18,7 @@ class WeatherCard extends Component {
 
     render() {
         return (
-            <div className="card-content" ref={ (el) => { this.el = el}}>
+            <div className="card-content" >
                 <div className="card-location col-md-8">
                     {this.props.card.location}
                 </div>

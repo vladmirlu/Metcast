@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import {getUserProfile} from '../../util/APIUtils';
-import {Avatar, Button, Form, Input, notification, Tabs} from 'antd';
+import {Avatar, Tabs} from 'antd';
 import {getAvatarColor} from '../../util/Colors';
 import LoadingIndicator from '../../common/LoadingIndicator';
 import './Profile.css';
 import NotFound from '../../common/NotFound';
 import ServerError from '../../common/ServerError';
 import WeatherCardList from "../../weather/WeatherCardList";
-import NewCard from "../../weather/NewCard";
+import AddWeatherCard from "../../weather/AddWeatherCard";
 
 const TabPane = Tabs.TabPane;
 
@@ -62,7 +62,7 @@ class Profile extends Component {
     }
 
     setCardIds(event){
-
+        console.log(event);
       this.setState({
           cardIds : event
       })
@@ -108,11 +108,11 @@ class Profile extends Component {
                                       tabBarStyle={tabBarStyle}
                                       size="large"
                                       className="profile-tabs">
-                                    <TabPane tab={'Weather cards'} key="1">
-                                        <WeatherCardList user={this.state.user} cardId = {this.state.cardId}/>
+                                    <TabPane tab={'List of weather cards'} key="1">
+                                        <WeatherCardList user={this.state.user} cardIds = {this.state.cardIds}/>
                                     </TabPane>
-                                    <TabPane tab={'Create weather card'} key="2">
-                                    <NewCard user={this.state.user} setCardId= {(event) => this.setCardIds(event)}/>
+                                    <TabPane tab={'Create weather cards'} key="2">
+                                    <AddWeatherCard user={this.state.user} setCardIds= {(event) => this.setCardIds(event)}/>
                                     </TabPane>
                                 </Tabs>
                             </div>

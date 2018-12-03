@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import {deleteWeatherCard, getUserCreatedWeatherCards} from '../util/APIUtils';
 import WeatherCard from './WeatherCard';
-import {Button, Icon, notification} from 'antd';
-import {Switch, withRouter} from 'react-router-dom';
+import {notification} from 'antd';
+import {withRouter} from 'react-router-dom';
 import './WeatherCardList.css';
 
 
@@ -16,9 +16,6 @@ class WeatherCardList extends Component {
             this.loadWeatherCards();
     }
 
-   /* componentDidMount() {
-        this.loadWeatherCards();
-    }*/
     componentDidUpdate(nextProps) {
         if (this.props.cardIds !== nextProps.cardIds) {
             this.loadWeatherCards();
@@ -71,7 +68,6 @@ class WeatherCardList extends Component {
         });
     }
 
-
     render() {
         const weatherCardViews = [];
         this.state.weatherCards.forEach((card, cardIndex) => {
@@ -81,7 +77,6 @@ class WeatherCardList extends Component {
         });
 
         return (
-
             <div className="cards-container">
                 {weatherCardViews}
                 {
@@ -92,7 +87,6 @@ class WeatherCardList extends Component {
                     ) : null
                 }
             </div>
-
         );
     }
 }

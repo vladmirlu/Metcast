@@ -23,16 +23,6 @@ class AppHeader extends Component {
         let menuItems;
         if(this.props.currentUser) {
           menuItems = [
-            <Menu.Item key="/">
-              <Link to="/">
-                <Icon type="home" className="nav-icon" />
-              </Link>
-            </Menu.Item>,
-            <Menu.Item key="/poll/new">
-            <Link to="/poll/new">
-
-            </Link>
-          </Menu.Item>,
           <Menu.Item key="/profile" className="profile-menu">
                 <ProfileDropdownMenu 
                   currentUser={this.props.currentUser} 
@@ -54,13 +44,13 @@ class AppHeader extends Component {
             <Header className="app-header">
             <div className="container">
               <div className="app-title" >
-                <Link to="/">Polling App</Link>
+                <Link to= {this.props.isAuthenticated ? "/users/" + this.props.currentUser.username : "/login"} >Weather Forecast Application</Link>
               </div>
               <Menu
                 className="app-menu"
                 mode="horizontal"
                 selectedKeys={[this.props.location.pathname]}
-                style={{ lineHeight: '64px' }} >
+              >
                   {menuItems}
               </Menu>
             </div>
@@ -73,9 +63,6 @@ function ProfileDropdownMenu(props) {
   const dropdownMenu = (
     <Menu onClick={props.handleMenuClick} className="profile-dropdown-menu">
       <Menu.Item key="user-info" className="dropdown-item" disabled>
-        <div className="user-full-name-info">
-          {props.currentUser.name}
-        </div>
         <div className="username-info">
           @{props.currentUser.username}
         </div>
