@@ -12,23 +12,23 @@ import java.util.Set;
 @RestController
 @RequestMapping("api/weather/cards/")
 @Transactional
-@CrossOrigin(origins = "http://localhost:3000")
+/*@CrossOrigin(origins = "http://localhost:3000")*/
 public class SynopticController {
 
     @Autowired
     private SynopticService synopticService;
 
-    @RequestMapping(value = "get-all/{username}")
+    @GetMapping(value = "get-all/{username}")
     public ResponseEntity<List<WeatherCardDTO>> getAllWeatherCard(@PathVariable ("username") String username){
           return synopticService.findUserAllWeatherCards(username);
     }
 
-    @RequestMapping(value = "add/{username}", method = RequestMethod.POST)
+    @PostMapping(value = "add/{username}")
     public ResponseEntity<List<Long>> addFewWeatherCards(@PathVariable ("username") String username, @RequestBody Set<String> locations){
         return synopticService.saveWeatherCardList(locations, username);
     }
 
-    @RequestMapping(value = "delete/{location}", method = RequestMethod.DELETE)
+    @DeleteMapping(value = "delete/{location}")
     public ResponseEntity<WeatherCardDTO> deleteCard(@PathVariable("location") String location){
         return synopticService.deleteWeatherCard(location);
     }

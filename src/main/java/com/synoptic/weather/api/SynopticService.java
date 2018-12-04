@@ -1,24 +1,30 @@
 package com.synoptic.weather.api;
 
 import com.synoptic.weather.database.dao.WeatherCardDao;
+import com.synoptic.weather.database.dto.UserDTO;
 import com.synoptic.weather.database.dto.WeatherCardDTO;
 import com.synoptic.weather.database.entity.User;
 import com.synoptic.weather.database.entity.WeatherCard;
+import com.synoptic.weather.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
-@CacheConfig(cacheNames={"cardDTOs"})
+@CacheConfig(cacheNames = {"cardDTOs"})
 public class SynopticService {
 
     @Autowired
@@ -30,48 +36,61 @@ public class SynopticService {
     @Autowired
     private MetcastBuilder metcastBuilder;
 
-    @CachePut
+    private List<WeatherCardDTO> cardDTOs;
+
+
     public ResponseEntity<List<Long>> saveWeatherCardList(Set<String> locations, String username) {
 
         User user = modelManager.getUserOrExit(username);
         List<Long> cardIds = new ArrayList<>();
         for (String location : locations) {
-            cardIds.add(updateOrCreateWeatherCard(location, user).getId());
+            cardIds.add(getOrCreateWeatherCard(location, user).getId());
         }
         return ResponseEntity.ok(cardIds);
     }
 
-    private WeatherCardDTO updateOrCreateWeatherCard(String location, User user) {
+    @CachePut
+    @CacheEvict(value = "cardDTOs", allEntries=true)
+    public WeatherCardDTO getOrCreateWeatherCard(String location, User user) {
 
-        WeatherCard card = cardDao.findWeatherCardByLocation(location);
-        WeatherCardDTO cardDTO;
-        if (card != null) {
-            card = metcastBuilder.fillWeatherCard(card);
-        } else {
-            card = metcastBuilder.fillWeatherCard(WeatherCard.builder().location(location).user(user).build());
+        WeatherCardDTO cardDTO = metcastBuilder.fillWeatherCard(WeatherCardDTO.builder()
+                .location(location).userDTO(UserDTO.builder().username(user.getUsername()).build()).build());
+
+        WeatherCard card = cardDao.findWeatherCardByLocation(location)
+                .orElse(WeatherCard.builder().location(location).user(user).build());
+
+        if (card.getId() == null) {
+            cardDao.save(card);
+            cardDTO.setId(card.getId());
+            cardDTOs.add(cardDTO);
         }
-        cardDao.save(card);
-        return card;
-    }
-
-
-    public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String username) {
-
-        List<WeatherCardDTO> cardDTOs = new ArrayList<>();
-        List<WeatherCard> weatherCards = cardDao.findAllByUser(modelManager.getUserOrExit(username));
-        for(WeatherCard card: weatherCards){
-            cardDTOs.add(modelManager.weatherCardToDTO(card));
+        else {
+            for (int i = 0; i < cardDTOs.size(); i++) {
+                if (cardDTOs.get(i).getLocation().equals(cardDTO.getLocation()))
+                    cardDTOs.set(i, cardDTO);
+            }
         }
-        cardDTOs = fillWeatherCardDTOs(cardDTOs);
-
-        return ResponseEntity.ok().cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS)).body(cardDTOs);
+       return cardDTO;
     }
 
     @Cacheable
-        public List<WeatherCardDTO> fillWeatherCardDTOs(List<WeatherCardDTO> cardDTOs){
+    public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String username) {
+
         simulateSlowService();
+        List<WeatherCard> cards = cardDao.findAllByUser(modelManager.getUserOrExit(username));
+        cardDTOs  = new ArrayList<>();
+        for (WeatherCard card : cards) {
+            cardDTOs.add(modelManager.weatherCardToDTO(card));
+        }
         cardDTOs.forEach(dto -> metcastBuilder.fillWeatherCard(dto));
-        return cardDTOs;
+
+        return ResponseEntity.ok(cardDTOs);
+    }
+
+    @CacheEvict(allEntries = true, value = "cardDTOs")
+    @Scheduled(fixedDelay =  1000 ,  initialDelay = 500)
+    public void reportCacheEvict() {
+        System.out.println("Flush Cache " + LocalDateTime.now().format(metcastBuilder.formatter));
     }
 
     private void simulateSlowService() {
@@ -83,10 +102,13 @@ public class SynopticService {
     }
 
     @CachePut
+    @CacheEvict(value = "cardDTOs", allEntries=true)
     public ResponseEntity<WeatherCardDTO> deleteWeatherCard(String location) {
 
-        WeatherCard weatherCard = modelManager.getWeatherCardOrError(location);
-        cardDao.delete(weatherCard);
+          WeatherCard weatherCard = modelManager.getWeatherCardOrError(location);
+          cardDao.delete(weatherCard);
+          cardDTOs.remove(cardDTOs.stream().filter(dto -> dto.getLocation().equals(location)).findAny().get());
+
         return ResponseEntity.ok(modelManager.weatherCardToDTO(weatherCard));
     }
 }
