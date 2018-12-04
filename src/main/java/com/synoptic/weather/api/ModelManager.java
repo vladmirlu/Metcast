@@ -38,7 +38,6 @@ public class ModelManager {
     public WeatherCardDTO weatherCardToDTO(WeatherCard weatherCard){
 
         return WeatherCardDTO.builder().id(weatherCard.getId()).location(weatherCard.getLocation())
-                .weatherUnits(weatherCard.getWeatherUnits())
                 .userDTO(userToDTO(weatherCard.getUser())).build();
     }
 

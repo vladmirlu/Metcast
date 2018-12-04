@@ -1,5 +1,6 @@
 package com.synoptic.weather.api;
 
+import com.synoptic.weather.database.dto.WeatherCardDTO;
 import com.synoptic.weather.database.entity.WeatherCard;
 import com.synoptic.weather.database.entity.WeatherUnit;
 import org.json.JSONArray;
@@ -35,13 +36,13 @@ public class MetcastBuilder {
     @Autowired
     SynopticHttpClient client;
 
-    public WeatherCard fillWeatherCard(WeatherCard weatherCard)  {
+    public WeatherCardDTO fillWeatherCard(WeatherCardDTO cardDTO)  {
 
-        Map<String, JSONArray> jsonObjectsMap = selectDataFromJSON(WWO_url + weatherCard.getLocation() + WWO_api_kay + WWO_days_forecast);
+        Map<String, JSONArray> jsonObjectsMap = selectDataFromJSON(WWO_url + cardDTO.getLocation() + WWO_api_kay + WWO_days_forecast);
         JSONObject weatherObjJSON = jsonObjectsMap.remove(jsonObjectsMap.keySet().stream().findFirst().get()).getJSONObject(0);
         WeatherUnit unit = buildWeatherUnit(weatherObjJSON, formatDateTime(LocalDateTime.now()));
-        weatherCard.setWeatherUnits(new ArrayList<>(Collections.singletonList(unit)));
-        return putWeatherUnitsInto(weatherCard, jsonObjectsMap);
+        cardDTO.setWeatherUnits(new ArrayList<>(Collections.singletonList(unit)));
+        return putWeatherUnitsInto(cardDTO, jsonObjectsMap);
     }
 
     public Map<String, JSONArray> selectDataFromJSON(String url) {
@@ -71,15 +72,15 @@ public class MetcastBuilder {
 
     }
 
-    public WeatherCard putWeatherUnitsInto(WeatherCard weatherCard, Map<String, JSONArray> jsonObjectsMap){
+    public WeatherCardDTO putWeatherUnitsInto(WeatherCardDTO cardDTO, Map<String, JSONArray> jsonObjectsMap){
 
         for (Map.Entry<String, JSONArray> entry : jsonObjectsMap.entrySet()) {
             JSONObject jsonObject = entry.getValue().getJSONObject(0);
-            weatherCard.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject, entry.getKey())));
+            cardDTO.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject, entry.getKey())));
             jsonObject = entry.getValue().getJSONObject(4);
-            weatherCard.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject, entry.getKey())));
+            cardDTO.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject, entry.getKey())));
         }
-        return weatherCard;
+        return cardDTO;
     }
 
     private LocalDateTime parseStringToDateTime(JSONObject jsonObj, String date){
