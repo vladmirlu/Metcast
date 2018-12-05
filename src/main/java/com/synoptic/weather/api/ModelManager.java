@@ -33,12 +33,7 @@ public class ModelManager {
 
     public WeatherCardDTO weatherCardToDTO(WeatherCard weatherCard){
 
-        return WeatherCardDTO.builder().id(weatherCard.getId()).location(weatherCard.getLocation())
-                .userDTO(userToDTO(weatherCard.getUser())).build();
-    }
-
-    private UserDTO userToDTO(User user){
-        return UserDTO.builder().email(user.getEmail()).build();
+        return WeatherCardDTO.builder().id(weatherCard.getId()).location(weatherCard.getLocation()).build();
     }
 
 }

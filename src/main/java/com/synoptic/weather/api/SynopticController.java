@@ -12,7 +12,6 @@ import java.util.Set;
 @RestController
 @RequestMapping("api/weather/cards/")
 @Transactional
-/*@CrossOrigin(origins = "http://localhost:3000")*/
 public class SynopticController {
 
     @Autowired

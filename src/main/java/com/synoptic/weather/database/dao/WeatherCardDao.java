@@ -14,9 +14,7 @@ import java.util.Set;
 @Transactional
 public interface WeatherCardDao extends CrudRepository<WeatherCard, Long> {
 
-    List<WeatherCard> findAllByUser(User user);
+    List<WeatherCard> findAllByUsersContains(User user);
 
     Optional<WeatherCard> findWeatherCardByLocation(String location);
-
-    List <WeatherCard> findAllByLocationIn (Set<String> locations);
 }

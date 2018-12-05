@@ -1,18 +1,14 @@
 package com.synoptic.weather.api;
 
 import com.synoptic.weather.database.dto.WeatherCardDTO;
-import com.synoptic.weather.database.entity.WeatherCard;
-import com.synoptic.weather.database.entity.WeatherUnit;
+import com.synoptic.weather.database.dto.WeatherUnit;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -27,9 +23,6 @@ public class MetcastBuilder {
 
     @Value("${WWO_days_forecast}")
     private String WWO_days_forecast;
-
-    @Autowired
-    private ResourceBundle rb;
 
     public final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd H:m");
 

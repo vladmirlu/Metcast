@@ -14,6 +14,6 @@ public class BeansUtil {
 
     @Bean
     public ResourceBundle resourceBundle() throws  IOException {
-        return new PropertyResourceBundle(new FileInputStream("src/main/resources/weather_data.properties"));
+        return new PropertyResourceBundle(new FileInputStream("src/main/resources/message.properties"));
     }
 }

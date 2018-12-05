@@ -4,12 +4,10 @@ import com.synoptic.weather.authentication.UserPrincipal;
 import com.synoptic.weather.authentication.payload.UserIdentityAvailability;
 import com.synoptic.weather.authentication.security.CurrentUser;
 import com.synoptic.weather.database.dao.UserDao;
-import com.synoptic.weather.database.dao.WeatherCardDao;
 import com.synoptic.weather.database.dto.UserDTO;
 import com.synoptic.weather.database.entity.User;
 import com.synoptic.weather.exception.ResourceNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +19,7 @@ public class UserController {
     @Autowired
     private UserDao userDao;
 
-    private WeatherCardDao weatherCardDao;
-
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private static final Logger logger = Logger.getLogger(UserController.class);
 
     @GetMapping("/user/me")
     @PreAuthorize("hasRole('USER')")

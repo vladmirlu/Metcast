@@ -25,7 +25,7 @@ public class WeatherCard {
     @Column(unique = true, nullable = false)
     private String location;
 
-    @ManyToOne
-    private User user;
+    @ManyToMany
+    private List <User> users;
 
 }

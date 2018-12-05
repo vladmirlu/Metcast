@@ -1,12 +1,11 @@
 package com.synoptic.weather.authentication.security;
 
-import com.synoptic.weather.authentication.AuthService;
+import com.synoptic.weather.authentication.CustomUserDetailsService;
 import com.synoptic.weather.authentication.security.jwt.JwtAuthenticationEntryPoint;
 import com.synoptic.weather.authentication.security.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -29,7 +28,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    AuthService authService;
+    CustomUserDetailsService customUserDetailsService;
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
@@ -42,7 +41,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder
-                .userDetailsService(authService)
+                .userDetailsService(customUserDetailsService)
                 .passwordEncoder(passwordEncoder());
     }
 

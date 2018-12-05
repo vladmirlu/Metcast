@@ -2,8 +2,8 @@ package com.synoptic.weather.authentication.security.jwt;
 
 import com.synoptic.weather.authentication.UserPrincipal;
 import io.jsonwebtoken.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
+    private final Logger logger = Logger.getLogger(JwtTokenProvider.class);
 
     @Value("${app.jwtSecret}")
     private String jwtSecret;
@@ -22,20 +22,18 @@ public class JwtTokenProvider {
 
     public String generateToken(Authentication authentication) {
 
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+        UserPrincipal userPrincipal = (UserPrincipal)authentication.getPrincipal();
 
         return Jwts.builder()
                 .setSubject(Long.toString(userPrincipal.getId()))
                 .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
+                .setExpiration(new Date(new Date().getTime() + jwtExpirationInMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
 
     public Long getUserIdFromJWT(String token) {
+
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)

@@ -1,9 +1,9 @@
 package com.synoptic.weather.authentication.security.jwt;
 
-import com.synoptic.weather.authentication.AuthService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.synoptic.weather.authentication.CustomUserDetailsService;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,9 +22,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtTokenProvider tokenProvider;
 
     @Autowired
-    private AuthService authService;
+    private CustomUserDetailsService customUserDetailsService;
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    @Value("${authHeader}")
+    private String authHeader;
+
+    @Value("${tokenPrefix}")
+    private String tokenPrefix;
+
+    private static final Logger logger = Logger.getLogger(JwtAuthenticationFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -32,12 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                Long userId = tokenProvider.getUserIdFromJWT(jwt);
 
-                UserDetails userDetails = authService.loadUserById(userId);
+                UserDetails userDetails = customUserDetailsService.loadUserById(tokenProvider.getUserIdFromJWT(jwt));
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ex) {
@@ -48,9 +52,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7, bearerToken.length());
+        String bearerToken = request.getHeader(authHeader);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(tokenPrefix)) {
+            return bearerToken.substring(7);
         }
         return null;
     }

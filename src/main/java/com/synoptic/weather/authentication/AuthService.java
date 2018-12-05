@@ -1,44 +1,71 @@
 package com.synoptic.weather.authentication;
 
+import com.synoptic.weather.authentication.payload.ApiResponse;
+import com.synoptic.weather.database.dao.RoleDao;
 import com.synoptic.weather.database.dao.UserDao;
+import com.synoptic.weather.database.dto.UserDTO;
+import com.synoptic.weather.database.entity.Role;
+import com.synoptic.weather.database.entity.RoleName;
 import com.synoptic.weather.database.entity.User;
+import com.synoptic.weather.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.util.Collections;
+import java.util.ResourceBundle;
 
 @Service
-public class AuthService implements UserDetailsService {
+public class AuthService {
+
+    @Autowired
+    RoleDao roleDao;
 
     @Autowired
     UserDao userDao;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ResourceBundle resBundle;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
+
     /**
-     *Lets login with either username or email
-     *
+     * Creates user's account
      * */
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        User user = userDao.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email : " + usernameOrEmail));
+    public ResponseEntity<?> createUserAccount(UserDTO userDTO){
 
-        return UserPrincipal.create(user);
+        Role userRole = roleDao.findByName(RoleName.ROLE_USER)
+                .orElseThrow(() -> new AppException(resBundle.getString("useRoleNotSet")));
+
+        User user = User.builder().username(userDTO.getUsername())
+                .email(userDTO.getEmail())
+                .password(passwordEncoder.encode(userDTO.getPassword()))
+                .roles(Collections.singleton(userRole)).build();
+
+        user = userDao.save(user);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/users/{username}")
+                .buildAndExpand(user.getUsername()).toUri();
+
+        return ResponseEntity.created(location).body(new ApiResponse(true, resBundle.getString("registerSuccess")));
     }
 
-    /** This method is used by JwtAuthenticationFilter
-     *
-     * */
-    @Transactional
-    public UserDetails loadUserById(Long id) {
-        User user = userDao.findById(id).orElseThrow(
-                () -> new UsernameNotFoundException("User not found with id : " + id)
-        );
+    public Authentication authenticateUser(UserDTO userDTO){
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
 
-        return UserPrincipal.create(user);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return authentication;
     }
-
 }
-

@@ -1,4 +1,4 @@
-package com.synoptic.weather.database.entity;
+package com.synoptic.weather.database.dto;
 
 import lombok.Builder;
 import lombok.Data;

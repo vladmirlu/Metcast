@@ -1,6 +1,7 @@
 export const API_BASE_URL = 'http://localhost:8181/api';
 
 export const ACCESS_TOKEN = 'accessToken';
+export const ACCESS_TOKEN_PREFIX = 'Metcast';
 
 export const USERNAME_MIN_LENGTH = 3;
 export const USERNAME_MAX_LENGTH = 15;

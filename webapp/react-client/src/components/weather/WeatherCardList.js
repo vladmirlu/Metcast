@@ -3,7 +3,6 @@ import {deleteWeatherCard, getUserCreatedWeatherCards} from '../util/APIUtils';
 import WeatherCard from './WeatherCard';
 import {notification} from 'antd';
 import {withRouter} from 'react-router-dom';
-import './WeatherCardList.css';
 
 
 class WeatherCardList extends Component {
@@ -81,9 +80,7 @@ class WeatherCardList extends Component {
                 {weatherCardViews}
                 {
                     this.state.weatherCards.length === 0 ? (
-                        <div className="no-cards-found">
-                            <span>No Weather Card Found.</span>
-                        </div>
+                        <div>No Weather Card Found</div>
                     ) : null
                 }
             </div>

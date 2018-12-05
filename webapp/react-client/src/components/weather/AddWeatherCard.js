@@ -84,17 +84,14 @@ class AddWeatherCard extends Component {
                 </div>
 
                     <Form onSubmit={this.handleAddWeatherCard}>
-
                         {locationViews}
-
-                        <FormItem className="card-form-row">
+                        <FormItem>
                             <Button type="primary"
                                     htmlType="submit"
                                     size="large"
                                     className="create-card-form-button">Submit data to create</Button>
                         </FormItem>
                     </Form>
-
             </div>
         );
     }
