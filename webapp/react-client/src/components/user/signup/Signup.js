@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { signup, checkUsernameAvailability, checkEmailAvailability } from '../../util/APIUtils';
+import { signup} from '../../util/APIUtils';
 import './Signup.css';
 import { Link } from 'react-router-dom';
 import { 
@@ -209,39 +209,9 @@ class Signup extends Component {
         this.setState({
             username: {
                 value: usernameValue,
-                validateStatus: 'validating',
+                validateStatus: 'success',
                 errorMsg: null
             }
-        });
-
-        checkUsernameAvailability(usernameValue)
-        .then(response => {
-            if(response.available) {
-                this.setState({
-                    username: {
-                        value: usernameValue,
-                        validateStatus: 'success',
-                        errorMsg: null
-                    }
-                });
-            } else {
-                this.setState({
-                    username: {
-                        value: usernameValue,
-                        validateStatus: 'error',
-                        errorMsg: 'This username is already taken'
-                    }
-                });
-            }
-        }).catch(error => {
-            // Marking validateStatus as success, Form will be recchecked at server
-            this.setState({
-                username: {
-                    value: usernameValue,
-                    validateStatus: 'success',
-                    errorMsg: null
-                }
-            });
         });
     }
 
@@ -263,39 +233,9 @@ class Signup extends Component {
         this.setState({
             email: {
                 value: emailValue,
-                validateStatus: 'validating',
+                validateStatus: 'success',
                 errorMsg: null
             }
-        });
-
-        checkEmailAvailability(emailValue)
-        .then(response => {
-            if(response.available) {
-                this.setState({
-                    email: {
-                        value: emailValue,
-                        validateStatus: 'success',
-                        errorMsg: null
-                    }
-                });
-            } else {
-                this.setState({
-                    email: {
-                        value: emailValue,
-                        validateStatus: 'error',
-                        errorMsg: 'This Email is already registered'
-                    }
-                });
-            }
-        }).catch(error => {
-            // Marking validateStatus as success, Form will be recchecked at server
-            this.setState({
-                email: {
-                    value: emailValue,
-                    validateStatus: 'success',
-                    errorMsg: null
-                }
-            });
         });
     }
 
@@ -317,7 +257,6 @@ class Signup extends Component {
             };            
         }
     }
-
 }
 
 export default Signup;
