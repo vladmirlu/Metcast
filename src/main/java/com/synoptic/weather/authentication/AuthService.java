@@ -22,6 +22,9 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.ResourceBundle;
 
+/**
+ * Service to organise user data for registration and authentication
+ * */
 @Service
 public class AuthService {
 
@@ -42,14 +45,16 @@ public class AuthService {
 
     /**
      * Creates user's account
+     *
+     * @param userDTO user data transfer  to provide user data
+     * @return response entity with informational response of success user creation
      * */
     public ResponseEntity<?> createUserAccount(UserDTO userDTO){
 
         Role userRole = roleDao.findByName(RoleName.ROLE_USER)
                 .orElseThrow(() -> new AppException(resBundle.getString("useRoleNotSet")));
 
-        User user = User.builder().username(userDTO.getUsername())
-                .email(userDTO.getEmail())
+        User user = User.builder().username(userDTO.getUsername()).email(userDTO.getEmail())
                 .password(passwordEncoder.encode(userDTO.getPassword()))
                 .roles(Collections.singleton(userRole)).build();
 
@@ -61,6 +66,12 @@ public class AuthService {
         return ResponseEntity.created(location).body(new ApiResponse(true, resBundle.getString("registerSuccess")));
     }
 
+    /**
+     * Gets current user data spring security authentication entity
+     *
+     * @param userDTO user data transfer object (DTO)
+     * @return current user data spring security authentication
+     * */
     public Authentication authenticateUser(UserDTO userDTO){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));

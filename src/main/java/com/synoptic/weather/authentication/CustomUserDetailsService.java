@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ResourceBundle;
 
+/**
+ * Customised spring security user details service
+ * */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -21,8 +24,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     private ResourceBundle resBundle;
 
     /**
-     *Lets login with either username or email
+     *Lets user login with either username or email
      *
+     * @param usernameOrEmail  user username or email
+     * @return user principal if user input data is valid
+     * @throws UsernameNotFoundException appears when user username or email is invalid
      * */
     @Override
     @Transactional
@@ -34,13 +40,14 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     /** This method is used by JwtAuthenticationFilter
-     *
+     * @param userId current user id
+     * @return user principal by id
      * */
     @Transactional
-    public UserDetails loadUserById(Long id) {
+    public UserDetails loadUserById(Long userId) {
 
-        User user = userDao.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException(resBundle.getString("userNotFoundWithId") + id));
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException(resBundle.getString("userNotFoundWithId") + userId));
         return UserPrincipal.create(user);
     }
 

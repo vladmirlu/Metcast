@@ -89,10 +89,10 @@ export function addWeatherCardList(state) {
     });
 }
 
-export function deleteWeatherCard(location) {
+export function deleteWeatherCard(location, username) {
 
     return request({
-        url: API_BASE_URL + "/weather/cards/delete/" + location,
+        url: API_BASE_URL + "/weather/cards/delete/" + location + "/" + username,
         method: 'DELETE'
     });
 }

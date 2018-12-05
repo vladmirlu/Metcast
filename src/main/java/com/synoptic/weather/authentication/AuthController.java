@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.ResourceBundle;
 
+/**
+ * Rest authentication controller
+ * */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -28,6 +31,12 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    /**
+     * Login user with jwt token
+     *
+     * @param userDTO user data transfer object (DTO)
+     * @return response entity with jwt token
+     * */
     @PostMapping("/signin")
     public ResponseEntity<?> loginUser(@Valid @RequestBody UserDTO userDTO) {
 
@@ -35,6 +44,12 @@ public class AuthController {
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwtToken));
     }
 
+    /**
+     * Register user
+     *
+     * @param userDTO user data transfer object (DTO)
+     * @return response entity with user DTO or goes throw RestBadRequestException exception when DTO data is invalid
+     * */
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO) {
         if(userDao.existsByUsername(userDTO.getUsername())) {

@@ -14,10 +14,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Service for organising weather data for rest controller
+ *
+ * */
 @Service
 @CacheConfig(cacheNames = {"cardDTOs"})
 public class SynopticService {
@@ -29,29 +32,44 @@ public class SynopticService {
     private ModelManager modelManager;
 
     @Autowired
-    private MetcastBuilder metcastBuilder;
+    private WeatherDataBuilder weatherDataBuilder;
 
+    /**
+     * List of weather data transfer objects
+     * */
     private List<WeatherCardDTO> cardDTOs;
 
-
-    public ResponseEntity<List<Long>> saveWeatherCardList(Set<String> locations, String username) {
+    /**
+     * Adjusts weather data lists for exact locations
+     *
+     *@param locations exact weather locations
+     * @param username username of current user
+     * @return response entity with locations iDs
+     * */
+    public ResponseEntity<List<Long>> adjustWeatherCardList(Set<String> locations, String username) {
 
         User user = modelManager.getUserOrExit(username);
         List<Long> cardIds = new ArrayList<>();
         for (String location : locations) {
-            cardIds.add(getOrCreateWeatherCard(location, user).getId());
+
+            WeatherCardDTO cardDTO = weatherDataBuilder.fillWeatherCardDTO(WeatherCardDTO.builder().location(location).build());
+            WeatherCard card = modelManager.getExistingCardOrNewCreated(location, user);
+            cardIds.add(updateOrCreateWeatherCard(card, cardDTO, user).getId());
         }
         return ResponseEntity.ok(cardIds);
     }
 
+    /**
+     *Creates and sets the new weather card or updates it exists and updates cached data
+     *
+     * @param card database entity to store weather locations
+     * @param cardDTO weather data transfer object to transport data from backend to frontend (DTO)
+     * @user current user
+     * @return filled weather DTO
+     * */
     @CachePut
     @CacheEvict(value = "cardDTOs", allEntries=true)
-    public WeatherCardDTO getOrCreateWeatherCard(String location, User user) {
-
-        WeatherCardDTO cardDTO = metcastBuilder.fillWeatherCard(WeatherCardDTO.builder().location(location).build());
-
-        WeatherCard card = cardDao.findWeatherCardByLocation(location)
-                .orElse(WeatherCard.builder().location(location).users(new ArrayList<>(Collections.singletonList(user))).build());
+    public WeatherCardDTO updateOrCreateWeatherCard(WeatherCard card, WeatherCardDTO cardDTO, User user) {
 
         if (card.getId() == null) {
             cardDao.save(card);
@@ -71,6 +89,12 @@ public class SynopticService {
        return cardDTO;
     }
 
+    /**
+     * Finds all weather cards of current user
+     *
+     * @param username current user username
+     * @return response entity of weather card DTOs
+     * */
     @Cacheable
     public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String username) {
 
@@ -79,22 +103,42 @@ public class SynopticService {
         for (WeatherCard card : cards) {
             cardDTOs.add(modelManager.weatherCardToDTO(card));
         }
-        cardDTOs.forEach(dto -> metcastBuilder.fillWeatherCard(dto));
+        cardDTOs.forEach(dto -> weatherDataBuilder.fillWeatherCardDTO(dto));
 
         return ResponseEntity.ok(cardDTOs);
     }
 
+    /**
+     *Evicts cached weather data and prints informational message
+     * */
     @CacheEvict(allEntries = true, value = "cardDTOs")
     public void reportCacheEvict() {
-        System.out.println("Flush Cache " + LocalDateTime.now().format(metcastBuilder.formatter));
+        System.out.println("Flush Cache " + LocalDateTime.now().format(weatherDataBuilder.formatter));
     }
 
+    /**
+     * Removes current user weather card data,
+     * Deletes weather card from database if it is not uses by other users
+     * removes weather data from weather DTO list and updates cached data
+     *
+     * @param location current weather location
+     * @param username current user username
+     * @return response entity of deleted weather card DTO
+     * */
     @CachePut
     @CacheEvict(value = "cardDTOs", allEntries=true)
-    public ResponseEntity<WeatherCardDTO> deleteWeatherCard(String location) {
+    public ResponseEntity<WeatherCardDTO> removeWeatherCardDTO(String location, String username) {
 
           WeatherCard weatherCard = modelManager.getWeatherCardOrError(location);
-          cardDao.delete(weatherCard);
+          User user = modelManager.getUserOrExit(username);
+
+          if(weatherCard.getUsers().contains(user)){
+              weatherCard.getUsers().remove(user);
+              cardDao.save(weatherCard);
+          }
+          if(weatherCard.getUsers().isEmpty()){
+              cardDao.delete(weatherCard);
+          }
           cardDTOs.remove(cardDTOs.stream().filter(dto -> dto.getLocation().equals(location)).findAny().get());
 
         return ResponseEntity.ok(modelManager.weatherCardToDTO(weatherCard));

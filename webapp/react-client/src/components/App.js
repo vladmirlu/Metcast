@@ -88,7 +88,6 @@ class App extends Component {
     if(this.state.isLoading) {
       return <LoadingIndicator />
     }
-    //const profilePath = "/users/" + this.state.currentUser.username;
     return (
         <Layout className="app-container">
           <AppHeader isAuthenticated={this.state.isAuthenticated}

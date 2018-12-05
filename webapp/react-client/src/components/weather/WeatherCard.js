@@ -52,7 +52,10 @@ class WeatherCard extends Component {
                                 {
                                     this.props.card.weatherUnits.map((unit) => {
                                         return <tr>
-                                            <td className='desc-col'>{unit.dateTime}</td>
+                                            <td className='desc-col'>
+                                            <div>{unit.dateTime.substring(0, 10)}</div>
+                                                <div>{unit.dateTime.substring(11, 16)}</div>
+                                            </td>
                                             <td className='desc-col'>
                                                 <img src={unit.weatherIconUrl}>
                                                 </img>

@@ -45,7 +45,7 @@ class WeatherCardList extends Component {
 
     handleCardDelete(event, cardIndex) {
 
-        deleteWeatherCard(event.target.value)
+        deleteWeatherCard(event.target.value, this.props.user.username)
             .then(response => {
                 notification.success({
                     message: 'Metcast App',
