@@ -3,6 +3,7 @@ package com.synoptic.weather.authentication.security;
 import com.synoptic.weather.authentication.CustomUserDetailsService;
 import com.synoptic.weather.authentication.security.jwt.JwtAuthenticationEntryPoint;
 import com.synoptic.weather.authentication.security.jwt.JwtAuthenticationFilter;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +19,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 /**
  * Spring security configuration object
  */
@@ -26,6 +26,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    private final Logger logger = Logger.getLogger(SpringSecurityConfig.class);
 
     @Autowired
     CustomUserDetailsService customUserDetailsService;
@@ -48,9 +50,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        authenticationManagerBuilder
-                .userDetailsService(customUserDetailsService)
-                .passwordEncoder(passwordEncoder());
+
+        authenticationManagerBuilder.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder());
+        logger.info("Authentication manager builder is configured = " + authenticationManagerBuilder.isConfigured());
     }
 
     /**
@@ -62,6 +64,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
+
+        logger.info("Authentication manager bean = " + BeanIds.AUTHENTICATION_MANAGER);
         return super.authenticationManagerBean();
     }
 
@@ -77,33 +81,19 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * Configures user session and sets access via urls for authenticated and unauthorised users
+     * Adds custom JwtAuthenticationFilter JWT security filter
      *
      * @param http spring http security
      * @throws Exception when called headers() method
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.headers().disable()
-                .cors()
-                .and()
-                .csrf()
-                .disable()
-                .exceptionHandling()
-                .authenticationEntryPoint(unauthorizedHandler)
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                .antMatchers("/",
-                        "/favicon.ico",
-                        "/**/*.png",
-                        "/**/*.gif",
-                        "/**/*.svg",
-                        "/**/*.jpg",
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js")
+
+        http.headers().disable().cors()
+                .and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().authorizeRequests()
+                .antMatchers("/", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg", "/**/*.jpg", "/**/*.html", "/**/*.css", "/**/*.js")
                 .permitAll()
                 .antMatchers("/api/auth/**")
                 .permitAll()
@@ -111,8 +101,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .anyRequest()
                 .authenticated();
-
-        // Add our custom JWT security filter
+        logger.info("Configure access via url by " + http);
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        logger.info("Add custom JWT security filter with jwt token prefix: " + jwtAuthenticationFilter().getTokenPrefix());
     }
 }

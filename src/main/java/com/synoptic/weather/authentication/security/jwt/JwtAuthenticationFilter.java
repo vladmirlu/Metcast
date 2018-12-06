@@ -1,6 +1,7 @@
 package com.synoptic.weather.authentication.security.jwt;
 
 import com.synoptic.weather.authentication.CustomUserDetailsService;
+import lombok.Getter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     /**
      * Jwt token prefix
      */
+    @Getter
     @Value("${tokenPrefix}")
     private String tokenPrefix;
 
@@ -64,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception ex) {
-            logger.error("Could not set user authentication in security context", ex);
+            logger.error("Could not set user authentication in security context: " + ex.getMessage());
         }
         filterChain.doFilter(request, response);
     }
@@ -76,7 +78,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @return jwt token or null token invalid or not found
      */
     private String getJwtTokenFromRequest(HttpServletRequest request) {
+
         String jwtToken = request.getHeader(authHeader);
+        logger.debug("Current jwt token = " + jwtToken);
         if (StringUtils.hasText(jwtToken) && jwtToken.startsWith(tokenPrefix)) {
             return jwtToken.substring(7);
         }

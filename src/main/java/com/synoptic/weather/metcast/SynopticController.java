@@ -1,4 +1,4 @@
-package com.synoptic.weather.api;
+package com.synoptic.weather.metcast;
 
 import com.synoptic.weather.model.entity.dto.WeatherCardDTO;
 import org.apache.log4j.Logger;

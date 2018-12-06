@@ -1,4 +1,4 @@
-package com.synoptic.weather.api;
+package com.synoptic.weather.metcast;
 
 import com.synoptic.weather.model.entity.dto.WeatherCardDTO;
 import com.synoptic.weather.model.entity.dto.WeatherUnit;
@@ -18,6 +18,8 @@ import java.util.*;
  */
 @Service
 public class WeatherDataBuilder {
+
+    private static final Logger logger = Logger.getLogger(WeatherDataBuilder.class);
 
     /**
      * 'World Weather Online' weather data provider API url
@@ -44,8 +46,6 @@ public class WeatherDataBuilder {
 
     @Autowired
     SynopticHttpClient client;
-
-    private static final Logger logger = Logger.getLogger(WeatherDataBuilder.class);
 
     /**
      * Fills weather DTO with data from json
@@ -96,12 +96,15 @@ public class WeatherDataBuilder {
 
         JSONObject weatherObjJSON = jsonObjectsMap.remove(jsonObjectsMap.keySet().stream().findFirst().get()).getJSONObject(0);
         cardDTO.setWeatherUnits(new ArrayList<>(Collections.singletonList(buildWeatherUnit(weatherObjJSON, formatDateTime(LocalDateTime.now())))));
+        logger.debug("Fill weather card DTO with selected weather data: " + weatherObjJSON.toString());
 
         for (Map.Entry<String, JSONArray> entry : jsonObjectsMap.entrySet()) {
             JSONObject jsonObject = entry.getValue().getJSONObject(0);
             cardDTO.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject.getString("time"), entry.getKey())));
+            logger.debug("Fill weather card DTO with selected weather data: " + jsonObject.toString());
             jsonObject = entry.getValue().getJSONObject(4);
             cardDTO.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject.getString("time"), entry.getKey())));
+            logger.debug("Fill weather card DTO with selected weather data: " + jsonObject.toString());
         }
         return cardDTO;
     }
@@ -114,7 +117,7 @@ public class WeatherDataBuilder {
      * @return new built weather unit of exact day period
      */
     private WeatherUnit buildWeatherUnit(JSONObject weatherObjJSON, LocalDateTime dateTime) {
-
+        logger.debug("Fill weather card DTO of date time: " + dateTime + " with selected weather data: " + weatherObjJSON.toString());
         return WeatherUnit.builder().dateTime(dateTime)
                 .weatherDescription(weatherObjJSON.getJSONArray("weatherDesc").getJSONObject(0).getString("value"))
                 .tempCelsius(dateTime.isAfter(formatDateTime(LocalDateTime.now())) ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
@@ -125,7 +128,6 @@ public class WeatherDataBuilder {
                 .cloudCoverPercent(weatherObjJSON.getInt("cloudcover"))
                 .windSpeedKmPerHour(weatherObjJSON.getInt("windspeedKmph"))
                 .weatherIconUrl(weatherObjJSON.getJSONArray("weatherIconUrl").getJSONObject(0).getString("value")).build();
-
     }
 
     /**
@@ -137,6 +139,7 @@ public class WeatherDataBuilder {
      */
     private LocalDateTime parseStringToDateTime(String timeStr, String dateStr) {
         int time = Integer.parseInt(timeStr);
+        logger.debug("Parsing time " + timeStr + " and date "+ dateStr + " to java.LocalDateTime");
         return LocalDateTime.parse(dateStr + " " + time / 100 + ":" + time % 100, formatter);
     }
 
@@ -147,6 +150,7 @@ public class WeatherDataBuilder {
      * @return formatted local date and time in format of "yyyy-MM-dd H:m"
      */
     private LocalDateTime formatDateTime(LocalDateTime dateTime) {
+        logger.debug("Parsing LocalDateTime " + dateTime + " to format of "+ formatter.toString());
         return LocalDateTime.parse(dateTime.format(formatter), formatter);
     }
 }

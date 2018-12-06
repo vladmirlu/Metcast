@@ -1,7 +1,8 @@
 package com.synoptic.weather.authentication;
 
-import com.synoptic.weather.model.repository.UserDao;
 import com.synoptic.weather.model.entity.User;
+import com.synoptic.weather.provider.EntityProviderBuilder;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -9,19 +10,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ResourceBundle;
-
 /**
  * Customised spring security user details service
  * */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    UserDao userDao;
+    private final Logger logger = Logger.getLogger(CustomUserDetailsService.class);
 
     @Autowired
-    private ResourceBundle resBundle;
+    private EntityProviderBuilder entityProviderBuilder;
 
     /**
      *Lets user login with either username or email
@@ -33,8 +31,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        User user = userDao.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-                .orElseThrow(() -> new UsernameNotFoundException(resBundle.getString("userNotFoundWith") + usernameOrEmail));
+
+        User user = entityProviderBuilder.getUserByUsernameOrEmailOrError(usernameOrEmail);
 
         return UserPrincipal.create(user);
     }
@@ -46,8 +44,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional
     public UserDetails loadUserById(Long userId) {
 
-        User user = userDao.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException(resBundle.getString("userNotFoundWithId") + userId));
+        User user = entityProviderBuilder.getUserByIdOrError(userId);
+
         return UserPrincipal.create(user);
     }
 

@@ -1,25 +1,21 @@
 package com.synoptic.weather.authentication;
 
 import com.synoptic.weather.authentication.response.ApiResponse;
-import com.synoptic.weather.model.repository.RoleDao;
 import com.synoptic.weather.model.repository.UserDao;
 import com.synoptic.weather.model.entity.dto.UserDTO;
-import com.synoptic.weather.model.entity.Role;
-import com.synoptic.weather.model.entity.RoleName;
 import com.synoptic.weather.model.entity.User;
-import com.synoptic.weather.exception.AppException;
+import com.synoptic.weather.provider.EntityProviderBuilder;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.ResourceBundle;
 
 /**
@@ -28,20 +24,28 @@ import java.util.ResourceBundle;
 @Service
 public class AuthService {
 
-    @Autowired
-    RoleDao roleDao;
+    private final Logger logger = Logger.getLogger(AuthService.class);
 
+    /**
+     * User repository
+     * */
     @Autowired
-    UserDao userDao;
+    private UserDao userDao;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
+    /**
+     * Object to provide data from property file
+     * */
     @Autowired
     private ResourceBundle resBundle;
 
+    /**
+     * Spring authentication manager
+     * */
     @Autowired
     AuthenticationManager authenticationManager;
+
+    @Autowired
+    private EntityProviderBuilder entityProviderBuilder;
 
     /**
      * Creates user's account
@@ -51,17 +55,10 @@ public class AuthService {
      * */
     public ResponseEntity<?> createUserAccount(UserDTO userDTO){
 
-        Role userRole = roleDao.findByName(RoleName.ROLE_USER)
-                .orElseThrow(() -> new AppException(resBundle.getString("useRoleNotSet")));
-
-        User user = User.builder().username(userDTO.getUsername()).email(userDTO.getEmail())
-                .password(passwordEncoder.encode(userDTO.getPassword()))
-                .roles(Collections.singleton(userRole)).build();
-
-        user = userDao.save(user);
-
-        URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/users/{username}")
-                .buildAndExpand(user.getUsername()).toUri();
+        logger.debug("Creating account for user: " + userDTO.toString());
+        User user =  userDao.save(entityProviderBuilder.getPreparedForCreationUser(userDTO));
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/users/{username}").buildAndExpand(user.getUsername()).toUri();
+        logger.debug("Account for user: " + user.toString() + " created");
 
         return ResponseEntity.created(location).body(new ApiResponse(true, resBundle.getString("registerSuccess")));
     }
@@ -75,8 +72,9 @@ public class AuthService {
     public Authentication authenticateUser(UserDTO userDTO){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        logger.debug("User: " + userDTO.toString() + " authenticated");
+
         return authentication;
     }
 }

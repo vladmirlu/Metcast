@@ -5,6 +5,7 @@ import com.synoptic.weather.authentication.security.jwt.JwtTokenProvider;
 import com.synoptic.weather.model.repository.UserDao;
 import com.synoptic.weather.model.entity.dto.UserDTO;
 import com.synoptic.weather.exception.RestBadRequestException;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,15 +20,29 @@ import java.util.ResourceBundle;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private final Logger logger = Logger.getLogger(AuthController.class);
+
+    /**
+     * User data transfer object
+     * */
     @Autowired
     UserDao userDao;
 
+    /**
+     * Component to provide jwt
+     * */
     @Autowired
     JwtTokenProvider tokenProvider;
 
+    /**
+     * Object to provide data from property file
+     * */
     @Autowired
     private ResourceBundle resBundle;
 
+    /**
+     * Service to assist user authentication
+     * */
     @Autowired
     private AuthService authService;
 
@@ -41,6 +56,7 @@ public class AuthController {
     public ResponseEntity<?> loginUser(@Valid @RequestBody UserDTO userDTO) {
 
         String jwtToken = tokenProvider.generateToken(authService.authenticateUser(userDTO));
+        logger.info("Login user " + userDTO.toString() + " successfully");
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwtToken));
     }
 
@@ -53,11 +69,14 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO) {
         if(userDao.existsByUsername(userDTO.getUsername())) {
+            logger.error("Username: " + userDTO.getUsername() + " is already taken. Process goes throw new RestBadRequestException");
            throw new RestBadRequestException(resBundle.getString("usernameIsTaken"));
         }
         if(userDao.existsByEmail(userDTO.getEmail())) {
+            logger.error("Email: " + userDTO.getEmail() + " is already in use. Process goes throw new RestBadRequestException");
             throw new RestBadRequestException(resBundle.getString("emailInUse"));
         }
+        logger.info("Start registration of user: " + userDTO.toString());
        return authService.createUserAccount(userDTO);
     }
 }

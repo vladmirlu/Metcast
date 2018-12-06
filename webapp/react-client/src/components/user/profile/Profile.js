@@ -99,10 +99,10 @@ class Profile extends Component {
                                 </div>
                                 <div className="user-summary">
                                     <div className="full-name">{this.state.user.username}</div>
-                                    <div className="username">@{this.state.user.username}</div>
+                                    <div className="username">@{this.state.user.email}</div>
                                 </div>
                             </div>
-                            <div className="user-poll-details">
+                            <div>
                                 <Tabs defaultActiveKey="2"
                                       animated={false}
                                       tabBarStyle={tabBarStyle}

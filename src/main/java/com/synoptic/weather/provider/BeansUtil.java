@@ -1,4 +1,4 @@
-package com.synoptic.weather.beans;
+package com.synoptic.weather.provider;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;

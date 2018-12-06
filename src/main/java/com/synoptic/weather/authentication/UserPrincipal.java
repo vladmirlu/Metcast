@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.synoptic.weather.model.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.apache.log4j.Logger;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,8 @@ import java.util.stream.Collectors;
 @Data
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
+
+    private static final Logger logger = Logger.getLogger(UserPrincipal.class);
 
     private Long id;
 
@@ -44,7 +47,7 @@ public class UserPrincipal implements UserDetails {
     public static UserPrincipal create(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
                 new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
-
+        logger.debug("Creating new UserPrincipal for user: " + user.toString());
         return new UserPrincipal(user.getId(), user.getUsername(), user.getEmail(), user.getPassword(), authorities);
     }
 
@@ -96,6 +99,7 @@ public class UserPrincipal implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserPrincipal that = (UserPrincipal) o;
+        logger.debug("This UserPrincipal equals that = " + Objects.equals(id, that.id));
         return Objects.equals(id, that.id);
     }
 

@@ -1,4 +1,4 @@
-package com.synoptic.weather.api;
+package com.synoptic.weather.metcast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
