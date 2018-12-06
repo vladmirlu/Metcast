@@ -66,10 +66,10 @@ export function getUserCreatedWeatherCards(username) {
     });
 }
 
-export function addWeatherCardList(state) {
+export function adjustWeatherCardList(state) {
 
     return request({
-        url: API_BASE_URL + "/weather/cards/add/" + state.username,
+        url: API_BASE_URL + "/weather/cards/adjust/" + state.username,
         method: 'POST',
         body: JSON.stringify(state.locations)
     });

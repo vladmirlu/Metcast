@@ -1,9 +1,9 @@
 package com.synoptic.weather.authentication;
 
-import com.synoptic.weather.authentication.payload.JwtAuthenticationResponse;
+import com.synoptic.weather.authentication.response.JwtAuthenticationResponse;
 import com.synoptic.weather.authentication.security.jwt.JwtTokenProvider;
-import com.synoptic.weather.database.dao.UserDao;
-import com.synoptic.weather.database.dto.UserDTO;
+import com.synoptic.weather.model.repository.UserDao;
+import com.synoptic.weather.model.entity.dto.UserDTO;
 import com.synoptic.weather.exception.RestBadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

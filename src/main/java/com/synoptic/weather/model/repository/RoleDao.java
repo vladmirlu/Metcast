@@ -1,13 +1,13 @@
-package com.synoptic.weather.database.dao;
+package com.synoptic.weather.model.repository;
 
-import com.synoptic.weather.database.entity.Role;
-import com.synoptic.weather.database.entity.RoleName;
+import com.synoptic.weather.model.entity.Role;
+import com.synoptic.weather.model.entity.RoleName;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 /**
- * Role repository to interact with database
+ * Role repository to interact with model
  * */
 @Transactional
 public interface RoleDao extends CrudRepository<Role, Long> {

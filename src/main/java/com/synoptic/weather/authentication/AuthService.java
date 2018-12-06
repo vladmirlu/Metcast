@@ -1,12 +1,12 @@
 package com.synoptic.weather.authentication;
 
-import com.synoptic.weather.authentication.payload.ApiResponse;
-import com.synoptic.weather.database.dao.RoleDao;
-import com.synoptic.weather.database.dao.UserDao;
-import com.synoptic.weather.database.dto.UserDTO;
-import com.synoptic.weather.database.entity.Role;
-import com.synoptic.weather.database.entity.RoleName;
-import com.synoptic.weather.database.entity.User;
+import com.synoptic.weather.authentication.response.ApiResponse;
+import com.synoptic.weather.model.repository.RoleDao;
+import com.synoptic.weather.model.repository.UserDao;
+import com.synoptic.weather.model.entity.dto.UserDTO;
+import com.synoptic.weather.model.entity.Role;
+import com.synoptic.weather.model.entity.RoleName;
+import com.synoptic.weather.model.entity.User;
 import com.synoptic.weather.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

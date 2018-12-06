@@ -1,18 +1,15 @@
-package com.synoptic.weather.database.dao;
+package com.synoptic.weather.model.repository;
 
-import com.synoptic.weather.database.entity.User;
-import com.synoptic.weather.database.entity.WeatherCard;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.synoptic.weather.model.entity.User;
+import com.synoptic.weather.model.entity.WeatherCard;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
- * WeatherCard repository to interact with database
+ * WeatherCard repository to interact with model
  */
 @Transactional
 public interface WeatherCardDao extends CrudRepository<WeatherCard, Long> {

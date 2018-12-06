@@ -1,10 +1,13 @@
-package com.synoptic.weather.database.dto;
+package com.synoptic.weather.model.entity.dto;
 
 import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Weather card data transfer object
+ * */
 @Data
 @Builder
 public class WeatherCardDTO {
@@ -13,5 +16,8 @@ public class WeatherCardDTO {
 
     private String location;
 
+    /**
+     *Weather time conditions list
+     * */
     private List<WeatherUnit> weatherUnits;
 }

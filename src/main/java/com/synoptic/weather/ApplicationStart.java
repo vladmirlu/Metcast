@@ -16,19 +16,22 @@ import java.util.TimeZone;
 @ImportResource("classpath:spring-scheduler.xml")
 public class ApplicationStart {
 
-    @Value("${log4jResourcesPath}")
-   private static String log4jResourcesPath;
-
     private final static Logger logger = Logger.getLogger(ApplicationStart.class);
 
+    /**
+     * Sets default UTC time zone
+     * */
     @PostConstruct
     void init() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
+    /**
+     * App entry point
+     * */
     public static void main(String[] args) {
         try {
-            PropertyConfigurator.configure(log4jResourcesPath);
+            PropertyConfigurator.configure("src/main/resources/log4j.properties");
             SpringApplication.run(ApplicationStart.class, args);
             logger.info("Main method started. " + TimeZone.getDefault());
         }catch (Throwable e){

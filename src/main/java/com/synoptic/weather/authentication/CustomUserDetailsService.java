@@ -1,7 +1,7 @@
 package com.synoptic.weather.authentication;
 
-import com.synoptic.weather.database.dao.UserDao;
-import com.synoptic.weather.database.entity.User;
+import com.synoptic.weather.model.repository.UserDao;
+import com.synoptic.weather.model.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

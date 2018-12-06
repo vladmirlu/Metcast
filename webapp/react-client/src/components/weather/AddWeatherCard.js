@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {addWeatherCardList} from '../util/APIUtils';
+import {adjustWeatherCardList} from '../util/APIUtils';
 import {Form, Button, notification} from 'antd';
 import LocationInput from "./LocationInput";
 import {Icon} from 'antd';
@@ -22,7 +22,7 @@ class AddWeatherCard extends Component {
     handleAddWeatherCard(event) {
         event.preventDefault();
 
-        addWeatherCardList(this.state)
+        adjustWeatherCardList(this.state)
             .then(response => {
                 notification.success({
                     message: 'Metcast App',

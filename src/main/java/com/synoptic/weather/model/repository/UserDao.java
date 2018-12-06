@@ -1,13 +1,13 @@
-package com.synoptic.weather.database.dao;
+package com.synoptic.weather.model.repository;
 
-import com.synoptic.weather.database.entity.User;
+import com.synoptic.weather.model.entity.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 /**
- * User repository to interact with database
+ * User repository to interact with model
  */
 @Transactional
 public interface UserDao extends CrudRepository<User, Long> {

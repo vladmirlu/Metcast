@@ -1,4 +1,4 @@
-package com.synoptic.weather.database.entity;
+package com.synoptic.weather.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +14,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 
+/**
+ * User entity
+ * */
 @Entity
 @Table(name = "users")
 public class User {
@@ -23,15 +26,27 @@ public class User {
     @Column
     private Long id;
 
-    @Column(name = "username", nullable = false)
+    /**
+     * user unique nick name
+     * */
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
 
+    /**
+     * user unique email
+     * */
     @Column(unique = true, nullable = false)
     private String email;
 
+    /**
+     * user password
+     * */
     @Column(name = "password", nullable = false)
     private String password;
 
+    /**
+     * user roles
+     * */
     @ManyToMany
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

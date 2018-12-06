@@ -19,7 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
-/**Spring security configuration object*/
+/**
+ * Spring security configuration object
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
@@ -33,12 +35,17 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * Jwt authentication filter
-     * */
+     */
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
     }
 
+    /**
+     * Builds security configurations for current API
+     *
+     * @param authenticationManagerBuilder object to build and manage current API configuration
+     */
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder
@@ -46,17 +53,34 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .passwordEncoder(passwordEncoder());
     }
 
+    /**
+     * Gets object to authenticate user by credentials
+     *
+     * @return super class authentication manager bean
+     * @throws Exception when superclass method called
+     */
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
 
+    /**
+     * Entity to encode user password
+     *
+     * @return cryptologic password encoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Configures user session and sets access via urls for authenticated and unauthorised users
+     *
+     * @param http spring http security
+     * @throws Exception when called headers() method
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.headers().disable()
@@ -90,6 +114,5 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // Add our custom JWT security filter
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
     }
 }

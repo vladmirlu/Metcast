@@ -1,6 +1,7 @@
 package com.synoptic.weather.api;
 
-import com.synoptic.weather.database.dto.WeatherCardDTO;
+import com.synoptic.weather.model.entity.dto.WeatherCardDTO;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,8 @@ import java.util.Set;
 @Transactional
 public class SynopticController {
 
+    private static final Logger logger = Logger.getLogger(SynopticController.class);
+
     @Autowired
     private SynopticService synopticService;
 
@@ -27,7 +30,9 @@ public class SynopticController {
      * @return response entity of all user weather cards data
      * */
     @GetMapping(value = "get-all/{username}")
-    public ResponseEntity<List<WeatherCardDTO>> getUserAllWeatherCard(@PathVariable ("username") String username){
+    public ResponseEntity<List<WeatherCardDTO>> getUserAllWeatherCards(@PathVariable ("username") String username){
+
+        logger.info("Weather cards of user " + username + " are requested");
           return synopticService.findUserAllWeatherCards(username);
     }
 
@@ -38,8 +43,10 @@ public class SynopticController {
      * @param locations weather location to adjust weather data
      * @return response entity of all adjusted weather cards data of current user
      * */
-    @PostMapping(value = "add/{username}")
+    @PostMapping(value = "adjust/{username}")
     public ResponseEntity<List<Long>> adjustWeatherCards(@PathVariable ("username") String username, @RequestBody Set<String> locations){
+
+        logger.info("Weather cards locations to add or update " + locations + " of user " + username + " are received ");
         return synopticService.adjustWeatherCardList(locations, username);
     }
 
@@ -52,6 +59,8 @@ public class SynopticController {
      * */
     @DeleteMapping(value = "delete/{location}/{username}")
     public ResponseEntity<WeatherCardDTO> deleteCard(@PathVariable("location") String location, @PathVariable("username") String username){
+
+        logger.info("Weather card location to delete " + location + " of user " + username + " are received");
         return synopticService.removeWeatherCardDTO(location, username);
     }
 }

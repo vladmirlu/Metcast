@@ -1,7 +1,8 @@
 package com.synoptic.weather.api;
 
-import com.synoptic.weather.database.dto.WeatherCardDTO;
-import com.synoptic.weather.database.dto.WeatherUnit;
+import com.synoptic.weather.model.entity.dto.WeatherCardDTO;
+import com.synoptic.weather.model.entity.dto.WeatherUnit;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +19,33 @@ import java.util.*;
 @Service
 public class WeatherDataBuilder {
 
+    /**
+     * 'World Weather Online' weather data provider API url
+     * */
     @Value("${WWO_url}")
-    private String WWO_url;
+    private String WWO_Url;
 
+    /**
+     * 'World Weather Online' weather data provider API key
+     * */
     @Value("${WWO_api_kay}")
-    private String WWO_api_kay;
+    private String WWO_ApiKey;
 
+    /**
+     *Days count to weather forecast using 'World Weather Online'
+     * */
     @Value("${WWO_days_forecast}")
-    private String WWO_days_forecast;
+    private String WWO_DaysForecast;
 
+    /**
+     * Date and time formatter
+     * */
     public final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd H:m");
 
     @Autowired
     SynopticHttpClient client;
+
+    private static final Logger logger = Logger.getLogger(WeatherDataBuilder.class);
 
     /**
      * Fills weather DTO with data from json
@@ -40,7 +55,10 @@ public class WeatherDataBuilder {
      */
     public WeatherCardDTO fillWeatherCardDTO(WeatherCardDTO cardDTO) {
 
-        JSONObject jsonObject = new JSONObject(client.provideWeatherData(WWO_url + cardDTO.getLocation() + WWO_api_kay + WWO_days_forecast));
+        String weatherSourceUrl = WWO_Url + cardDTO.getLocation() + WWO_ApiKey + WWO_DaysForecast;
+        logger.info("Sending request to receive data from weather provider: " + weatherSourceUrl);
+        JSONObject jsonObject = new JSONObject(client.provideWeatherData(weatherSourceUrl));
+        logger.debug("Received weather data from " + weatherSourceUrl);
         jsonObject = jsonObject.getJSONObject("data");
         Map<String, JSONArray> jsonObjectsMap = selectDataFromJSON(jsonObject);
         return putWeatherUnitsIntoDTO(cardDTO, jsonObjectsMap);
@@ -55,10 +73,14 @@ public class WeatherDataBuilder {
     public Map<String, JSONArray> selectDataFromJSON(JSONObject jsonObject) {
 
         Map<String, JSONArray> map = new LinkedHashMap<>();
-        map.put(jsonObject.getJSONArray("current_condition").getJSONObject(0).getString("observation_time"), jsonObject.getJSONArray("current_condition"));
+        JSONArray currentConditionJson = jsonObject.getJSONArray("current_condition");
+        map.put(currentConditionJson.getJSONObject(0).getString("observation_time"), currentConditionJson);
+        logger.debug("Received and set weather data of current weather condition: " + currentConditionJson);
         JSONArray jsonArray = jsonObject.getJSONArray("weather");
         for (int i = 1; i <= 3; i++) {
+
             map.put(jsonArray.getJSONObject(i).getString("date"), jsonArray.getJSONObject(i).getJSONArray("hourly"));
+            logger.debug("\n Received weather data of the date: " + jsonArray.getJSONObject(i).getString("date") + " data : " + jsonArray.getJSONObject(i).getJSONArray("hourly"));
         }
         return map;
     }
@@ -66,7 +88,7 @@ public class WeatherDataBuilder {
     /**
      * Puts weather units of today and next 3 days into weather card DTO
      *
-     * @param cardDTO        data transfer object(DTO)
+     * @param cardDTO   data transfer object(DTO)
      * @param jsonObjectsMap map of stored weather data
      * @return filled weather card DTO with weather units of today and next 3 days
      */

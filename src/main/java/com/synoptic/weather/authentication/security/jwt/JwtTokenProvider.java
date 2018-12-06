@@ -7,19 +7,26 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
 import java.util.Date;
 
 /**
-* Component to generate and provide jwt token
-* */
+ * Component to generate and provide jwt token
+ */
 @Component
 public class JwtTokenProvider {
 
     private final Logger logger = Logger.getLogger(JwtTokenProvider.class);
 
+    /**
+     * jwt secret key
+     * */
     @Value("${app.jwtSecret}")
     private String jwtSecret;
 
+    /**
+     * jwt token expiration time in milliseconds
+     * */
     @Value("${app.jwtExpirationInMs}")
     private int jwtExpirationInMs;
 
@@ -28,10 +35,10 @@ public class JwtTokenProvider {
      *
      * @param authentication spring security authentication entity
      * @return string jwt token
-     * */
+     */
     public String generateToken(Authentication authentication) {
 
-        UserPrincipal userPrincipal = (UserPrincipal)authentication.getPrincipal();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
         return Jwts.builder()
                 .setSubject(Long.toString(userPrincipal.getId()))
@@ -42,11 +49,11 @@ public class JwtTokenProvider {
     }
 
     /**
-     *Provides user id by jwtToken
+     * Provides user id by jwtToken
      *
      * @param jwtToken user jwt jwtToken
      * @return current user id
-     * */
+     */
     public Long getUserIdFromJWT(String jwtToken) {
 
         Claims claims = Jwts.parser()
@@ -58,11 +65,11 @@ public class JwtTokenProvider {
     }
 
     /**
-     *Validates user token
+     * Validates user token
      *
      * @param jwtToken user jwt token
      * @return true if user token is valid or false if not
-     * */
+     */
     public boolean isTokenValid(String jwtToken) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwtToken);

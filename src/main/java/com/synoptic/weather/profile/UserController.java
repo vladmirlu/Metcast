@@ -2,9 +2,9 @@ package com.synoptic.weather.profile;
 
 import com.synoptic.weather.authentication.UserPrincipal;
 import com.synoptic.weather.authentication.security.CurrentUser;
-import com.synoptic.weather.database.dao.UserDao;
-import com.synoptic.weather.database.dto.UserDTO;
-import com.synoptic.weather.database.entity.User;
+import com.synoptic.weather.model.repository.UserDao;
+import com.synoptic.weather.model.entity.dto.UserDTO;
+import com.synoptic.weather.model.entity.User;
 import com.synoptic.weather.exception.ResourceNotFoundException;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class UserController {
     @GetMapping("/user/current")
     @PreAuthorize("hasRole('USER')")
     public UserDTO getCurrentUser(@CurrentUser UserPrincipal currentUser) {
-
+    logger.info("The current user "+ currentUser.getUsername() + " is authorised ");
         return UserDTO.builder().id(currentUser.getId()).username(currentUser.getUsername()).build();
     }
 
@@ -45,6 +45,7 @@ public class UserController {
     public UserDTO getUserProfile(@PathVariable(value = "username") String username) {
 
         User user = userDao.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+        logger.debug("The user profile of "+ username + " is loaded ");
         return UserDTO.builder().username(user.getUsername()).email(user.getEmail()).build();
     }
 }

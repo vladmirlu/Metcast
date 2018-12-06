@@ -1,4 +1,4 @@
-package com.synoptic.weather.database.entity;
+package com.synoptic.weather.model.entity;
 
 
 import lombok.AllArgsConstructor;
@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.List;
 
+/**
+ * Weather card entities
+ * */
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,9 +25,15 @@ public class WeatherCard {
     @Column
     private Long id;
 
+    /**
+     * Geographic location
+     * */
     @Column(unique = true, nullable = false)
     private String location;
 
+    /**
+     * Users list referenced on current weather card
+     * */
     @ManyToMany
     private List <User> users;
 
