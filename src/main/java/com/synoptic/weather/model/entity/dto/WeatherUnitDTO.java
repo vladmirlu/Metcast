@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Builder
-public class WeatherUnit {
+public class WeatherUnitDTO {
 
     /**
      * local date and time
@@ -61,4 +61,23 @@ public class WeatherUnit {
      * weather icon url
      */
     private String weatherIconUrl;
+
+    /**
+     * Customised to string method
+     *
+     * @return current object as string
+     */
+    @Override
+    public String toString() {
+        return new StringBuilder().append(" WeatherUnitDTO: { dateTime: ").append(dateTime)
+                .append(", weatherDescription: ").append(weatherDescription)
+                .append(", tempCelsius: ").append(tempCelsius)
+                .append(", precipitationMM: ").append(precipitationMM)
+                .append(", pressureMillibars: ").append(pressureMillibars)
+                .append(", humidityPercent: ").append(humidityPercent)
+                .append(", visibilityKm: ").append(visibilityKm)
+                .append(", cloudCoverPercent: ").append(cloudCoverPercent)
+                .append(", windSpeedKmPerHour: ").append(windSpeedKmPerHour)
+                .append(", weatherIconUrl: ").append(weatherIconUrl).append(" } ").toString();
+    }
 }

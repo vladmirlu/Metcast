@@ -1,6 +1,5 @@
 package com.synoptic.weather.authentication.response;
 
-
 import lombok.Data;
 
 /**

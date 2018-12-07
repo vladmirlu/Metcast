@@ -1,6 +1,6 @@
 package com.synoptic.weather.provider;
 
-import com.synoptic.weather.exception.AppException;
+import com.synoptic.weather.exception.MetcastAppException;
 import com.synoptic.weather.model.entity.Role;
 import com.synoptic.weather.model.entity.RoleName;
 import com.synoptic.weather.model.entity.dto.UserDTO;
@@ -64,7 +64,7 @@ public class EntityProviderBuilder {
      * @param username current user username
      * @return existing user or goes throw ResourceNotFoundException exception
      */
-    public User getUserOrExit(String username) {
+    public User getUserOrError(String username) {
 
         logger.debug("The user " + username + " is providing");
         return userDao.findByUsername(username)
@@ -114,15 +114,13 @@ public class EntityProviderBuilder {
      * Prepare new user from user DTO with role USER and encode user password
      *
      * @param userDTO user DTO
-     * @return  prepared user or goes throw AppException exception
+     * @return  prepared user or goes throw MetcastAppException exception
      */
-    public User getPreparedForCreationUser(UserDTO userDTO) {
+    public User userDtoToUser(UserDTO userDTO) {
 
-        Role userRole = roleDao.findByName(RoleName.ROLE_USER).orElseThrow(() -> new AppException(resBundle.getString("useRoleNotSet")));
-        logger.debug("The new user to register " + userDTO + " with role " + RoleName.ROLE_USER.name() + " is creating");
+        logger.debug("The new user to register " + userDTO + " is creating");
         return User.builder().username(userDTO.getUsername()).email(userDTO.getEmail())
-                .password(passwordEncoder.encode(userDTO.getPassword()))
-                .roles(Collections.singleton(userRole)).build();
+                .password(passwordEncoder.encode(userDTO.getPassword())).roles(Collections.singleton(getRoleUserOrError())).build();
     }
 
     /**
@@ -149,6 +147,18 @@ public class EntityProviderBuilder {
         logger.debug("The user with id: " + userId + " is providing");
         return userDao.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException(resBundle.getString("userNotFoundWithId") + userId));
+    }
+
+    /**
+     * Gets role USER from repository
+     *
+     * @return User role named 'ROLE_USER'
+     * */
+    public Role getRoleUserOrError(){
+
+        logger.debug("The Role : " + RoleName.ROLE_USER + " is providing");
+       return roleDao.findByName(RoleName.ROLE_USER)
+               .orElseThrow(() -> new MetcastAppException(resBundle.getString("useRoleNotSet")));
     }
 
 }

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  * Rest controller to serve user profile
  * */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/users/")
 public class UserController {
 
     @Autowired
@@ -28,7 +28,7 @@ public class UserController {
  * @param currentUser  current principal user
  * @return user data transfer object with current user data
  * */
-    @GetMapping("/user/current")
+    @GetMapping("current")
     @PreAuthorize("hasRole('USER')")
     public UserDTO getCurrentUser(@CurrentUser UserPrincipal currentUser) {
     logger.info("The current user "+ currentUser.getUsername() + " is authorised ");
@@ -41,7 +41,7 @@ public class UserController {
      * @param username  current user username
      * @return user data transfer object with current user data
      * */
-    @GetMapping("/users/{username}")
+    @GetMapping("{username}")
     public UserDTO getUserProfile(@PathVariable(value = "username") String username) {
 
         User user = userDao.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User", "username", username));

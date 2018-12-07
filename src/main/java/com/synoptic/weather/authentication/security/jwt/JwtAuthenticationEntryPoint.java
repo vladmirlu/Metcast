@@ -8,9 +8,10 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
 /**
  * Authentication entry point
- * */
+ */
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -19,11 +20,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     /**
      * Overrides method of its superclass and sends error message about unauthorised user status
      *
-     * @param httpServletRequest http servlet request
+     * @param httpServletRequest  http servlet request
      * @param httpServletResponse http servlet response
-     * @param authExc authentication exception
+     * @param authExc             authentication exception
      * @throws IOException when response sends error message
-     * */
+     */
     @Override
     public void commence(HttpServletRequest httpServletRequest,
                          HttpServletResponse httpServletResponse,

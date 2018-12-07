@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Customised spring security user details service
- * */
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -22,12 +22,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     private EntityProviderBuilder entityProviderBuilder;
 
     /**
-     *Lets user login with either username or email
+     * Lets user login with either username or email
      *
-     * @param usernameOrEmail  user username or email
+     * @param usernameOrEmail user username or email
      * @return user principal if user input data is valid
      * @throws UsernameNotFoundException appears when user username or email is invalid
-     * */
+     */
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
@@ -37,10 +37,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         return UserPrincipal.create(user);
     }
 
-    /** This method is used by JwtAuthenticationFilter
+    /**
+     * This method is used by JwtAuthenticationFilter
+     *
      * @param userId current user id
      * @return user principal by id
-     * */
+     */
     @Transactional
     public UserDetails loadUserById(Long userId) {
 
@@ -48,7 +50,5 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return UserPrincipal.create(user);
     }
-
-
 }
 

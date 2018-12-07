@@ -20,13 +20,13 @@ public class JwtTokenProvider {
 
     /**
      * jwt secret key
-     * */
+     */
     @Value("${app.jwtSecret}")
     private String jwtSecret;
 
     /**
      * jwt token expiration time in milliseconds
-     * */
+     */
     @Value("${app.jwtExpirationInMs}")
     private int jwtExpirationInMs;
 
@@ -60,7 +60,7 @@ public class JwtTokenProvider {
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(jwt)
                 .getBody();
-        logger.debug("Get user id  by jwt = "+ jwt );
+        logger.debug("Get user id  by jwt = " + jwt);
         return Long.parseLong(claims.getSubject());
     }
 
@@ -73,20 +73,20 @@ public class JwtTokenProvider {
     public boolean isTokenValid(String jwtToken) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwtToken);
-            logger.info(" Jwt token "+ jwtToken.substring(10) + " is valid");
+            logger.info(" Jwt token " + jwtToken.substring(10) + " is valid");
             return true;
         } catch (SignatureException ex) {
             logger.error("Invalid JWT signature. token = " + jwtToken + "; Cached SignatureException: " + ex.getMessage());
         } catch (MalformedJwtException ex) {
             logger.error("Invalid JWT token = " + jwtToken + "; Cached MalformedJwtException: " + ex.getMessage());
         } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token = "  + jwtToken + "; Cached ExpiredJwtException: " + ex.getMessage());
+            logger.error("Expired JWT token = " + jwtToken + "; Cached ExpiredJwtException: " + ex.getMessage());
         } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token = "  + jwtToken + "; Cached UnsupportedJwtException: " + ex.getMessage());
+            logger.error("Unsupported JWT token = " + jwtToken + "; Cached UnsupportedJwtException: " + ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty. Token = "  + jwtToken + "; Cached IllegalArgumentException: " + ex.getMessage());
+            logger.error("JWT claims string is empty. Token = " + jwtToken + "; Cached IllegalArgumentException: " + ex.getMessage());
         }
-        logger.info("Invalid jwt token "+ jwtToken.substring(10));
+        logger.info("Invalid jwt token " + jwtToken.substring(10));
         return false;
     }
 }

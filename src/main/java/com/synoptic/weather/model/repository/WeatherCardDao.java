@@ -19,7 +19,7 @@ public interface WeatherCardDao extends CrudRepository<WeatherCard, Long> {
      *
      * @param user user contained in weather card list
      * */
-    List<WeatherCard> findAllByUsersContains(User user);
+    List<WeatherCard> findAllByUsersContaining(User user);
 
     /**
      * Finds optional weather card by location
@@ -27,4 +27,11 @@ public interface WeatherCardDao extends CrudRepository<WeatherCard, Long> {
      * @param location weather location
      * */
     Optional<WeatherCard> findWeatherCardByLocation(String location);
+
+    /**
+     * Checks if weather card exists by location
+     *
+     * @param location location
+     * */
+    Boolean existsByLocation(String location);
 }

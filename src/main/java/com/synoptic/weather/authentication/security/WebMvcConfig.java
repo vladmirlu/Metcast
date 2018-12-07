@@ -1,6 +1,7 @@
 package com.synoptic.weather.authentication.security;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -13,8 +14,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final Logger logger = Logger.getLogger(WebMvcConfig.class);
 
-    private final long MAX_AGE_SECS = 3600;
-
     /**
      * Configures mapping, origins and allows http methods
      *
@@ -26,7 +25,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("*")
                 .allowedMethods("HEAD", "OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE")
-                .maxAge(MAX_AGE_SECS);
+                .maxAge(3600);
         logger.info("Adds web mvc configuration " + registry.toString());
     }
 }

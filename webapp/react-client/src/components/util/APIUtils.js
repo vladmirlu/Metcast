@@ -45,7 +45,7 @@ export function getCurrentUser() {
         return Promise.reject("No access token set.");
     }
     return request({
-        url: API_BASE_URL + "/user/current",
+        url: API_BASE_URL + "/users/current",
         method: 'GET'
     });
 }
@@ -61,7 +61,7 @@ export function getUserProfile(username) {
 export function getUserCreatedWeatherCards(username) {
 
     return request({
-        url: API_BASE_URL + "/weather/cards/get-all/" + username,
+        url: API_BASE_URL + "/weather/cards/" + username,
         method: 'GET'
     });
 }
@@ -69,7 +69,7 @@ export function getUserCreatedWeatherCards(username) {
 export function adjustWeatherCardList(state) {
 
     return request({
-        url: API_BASE_URL + "/weather/cards/adjust/" + state.username,
+        url: API_BASE_URL + "/weather/cards/" + state.username,
         method: 'POST',
         body: JSON.stringify(state.locations)
     });
@@ -78,7 +78,7 @@ export function adjustWeatherCardList(state) {
 export function deleteWeatherCard(location, username) {
 
     return request({
-        url: API_BASE_URL + "/weather/cards/delete/" + location + "/" + username,
+        url: API_BASE_URL + "/weather/cards/" + location + "/" + username,
         method: 'DELETE'
     });
 }

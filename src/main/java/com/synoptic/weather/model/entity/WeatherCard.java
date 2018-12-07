@@ -37,4 +37,15 @@ public class WeatherCard {
     @ManyToMany
     private List <User> users;
 
+    /**
+     * Customised to string method
+     *
+     * @return current object as string
+     */
+    @Override
+    public String toString(){
+        return new StringBuilder().append(" WeatherCardDTO: { id: ").append(id)
+                .append(", location: ").append(location).append(", users: ")
+                .append(users).toString();
+    }
 }

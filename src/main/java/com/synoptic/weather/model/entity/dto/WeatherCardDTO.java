@@ -19,5 +19,17 @@ public class WeatherCardDTO {
     /**
      *Weather time conditions list
      * */
-    private List<WeatherUnit> weatherUnits;
+    private List<WeatherUnitDTO> weatherUnitDTOS;
+
+    /**
+     * Customised to string method
+     *
+     * @return current object as string
+     */
+    @Override
+    public String toString(){
+        return new StringBuilder().append(" WeatherCardDTO: { id: ").append(id)
+                .append(", location: ").append(location).append(", weatherUnitDTOS: ")
+                .append(weatherUnitDTOS).toString();
+    }
 }

@@ -50,7 +50,7 @@ class WeatherCard extends Component {
                                 </thead>
                                 <tbody>
                                 {
-                                    this.props.card.weatherUnits.map((unit) => {
+                                    this.props.card.weatherUnitDTOS.map((unit) => {
                                         return <tr>
                                             <td className='desc-col'>
                                             <div>{unit.dateTime.substring(0, 10)}</div>

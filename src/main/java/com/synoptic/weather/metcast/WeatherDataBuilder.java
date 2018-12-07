@@ -1,7 +1,8 @@
 package com.synoptic.weather.metcast;
 
 import com.synoptic.weather.model.entity.dto.WeatherCardDTO;
-import com.synoptic.weather.model.entity.dto.WeatherUnit;
+import com.synoptic.weather.model.entity.dto.WeatherUnitDTO;
+import com.synoptic.weather.provider.DateFormatter;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -23,29 +23,27 @@ public class WeatherDataBuilder {
 
     /**
      * 'World Weather Online' weather data provider API url
-     * */
+     */
     @Value("${WWO_url}")
     private String WWO_Url;
 
     /**
      * 'World Weather Online' weather data provider API key
-     * */
+     */
     @Value("${WWO_api_kay}")
     private String WWO_ApiKey;
 
     /**
-     *Days count to weather forecast using 'World Weather Online'
-     * */
+     * Days count to weather forecast using 'World Weather Online'
+     */
     @Value("${WWO_days_forecast}")
     private String WWO_DaysForecast;
 
-    /**
-     * Date and time formatter
-     * */
-    public final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd H:m");
+    @Autowired
+    private SynopticHttpClient client;
 
     @Autowired
-    SynopticHttpClient client;
+    private DateFormatter dateFormatter;
 
     /**
      * Fills weather DTO with data from json
@@ -88,22 +86,22 @@ public class WeatherDataBuilder {
     /**
      * Puts weather units of today and next 3 days into weather card DTO
      *
-     * @param cardDTO   data transfer object(DTO)
+     * @param cardDTO        data transfer object(DTO)
      * @param jsonObjectsMap map of stored weather data
      * @return filled weather card DTO with weather units of today and next 3 days
      */
     public WeatherCardDTO putWeatherUnitsIntoDTO(WeatherCardDTO cardDTO, Map<String, JSONArray> jsonObjectsMap) {
 
         JSONObject weatherObjJSON = jsonObjectsMap.remove(jsonObjectsMap.keySet().stream().findFirst().get()).getJSONObject(0);
-        cardDTO.setWeatherUnits(new ArrayList<>(Collections.singletonList(buildWeatherUnit(weatherObjJSON, formatDateTime(LocalDateTime.now())))));
+        cardDTO.setWeatherUnitDTOS(new ArrayList<>(Collections.singletonList(buildWeatherUnit(weatherObjJSON, dateFormatter.formatDateTime(LocalDateTime.now())))));
         logger.debug("Fill weather card DTO with selected weather data: " + weatherObjJSON.toString());
 
         for (Map.Entry<String, JSONArray> entry : jsonObjectsMap.entrySet()) {
             JSONObject jsonObject = entry.getValue().getJSONObject(0);
-            cardDTO.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject.getString("time"), entry.getKey())));
+            cardDTO.getWeatherUnitDTOS().add(buildWeatherUnit(jsonObject, dateFormatter.parseStringToDateTime(jsonObject.getString("time"), entry.getKey())));
             logger.debug("Fill weather card DTO with selected weather data: " + jsonObject.toString());
             jsonObject = entry.getValue().getJSONObject(4);
-            cardDTO.getWeatherUnits().add(buildWeatherUnit(jsonObject, parseStringToDateTime(jsonObject.getString("time"), entry.getKey())));
+            cardDTO.getWeatherUnitDTOS().add(buildWeatherUnit(jsonObject, dateFormatter.parseStringToDateTime(jsonObject.getString("time"), entry.getKey())));
             logger.debug("Fill weather card DTO with selected weather data: " + jsonObject.toString());
         }
         return cardDTO;
@@ -116,11 +114,11 @@ public class WeatherDataBuilder {
      * @param dateTime       date and time of weather unit
      * @return new built weather unit of exact day period
      */
-    private WeatherUnit buildWeatherUnit(JSONObject weatherObjJSON, LocalDateTime dateTime) {
+    private WeatherUnitDTO buildWeatherUnit(JSONObject weatherObjJSON, LocalDateTime dateTime) {
         logger.debug("Fill weather card DTO of date time: " + dateTime + " with selected weather data: " + weatherObjJSON.toString());
-        return WeatherUnit.builder().dateTime(dateTime)
+        return WeatherUnitDTO.builder().dateTime(dateTime)
                 .weatherDescription(weatherObjJSON.getJSONArray("weatherDesc").getJSONObject(0).getString("value"))
-                .tempCelsius(dateTime.isAfter(formatDateTime(LocalDateTime.now())) ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
+                .tempCelsius(dateTime.isAfter(dateFormatter.formatDateTime(LocalDateTime.now())) ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
                 .precipitationMM(weatherObjJSON.getFloat("precipMM"))
                 .pressureMillibars(weatherObjJSON.getInt("pressure"))
                 .humidityPercent(weatherObjJSON.getInt("humidity"))
@@ -128,29 +126,5 @@ public class WeatherDataBuilder {
                 .cloudCoverPercent(weatherObjJSON.getInt("cloudcover"))
                 .windSpeedKmPerHour(weatherObjJSON.getInt("windspeedKmph"))
                 .weatherIconUrl(weatherObjJSON.getJSONArray("weatherIconUrl").getJSONObject(0).getString("value")).build();
-    }
-
-    /**
-     * Parses date string to LocalDateTime
-     *
-     * @param timeStr time as string
-     * @param dateStr date as string
-     * @return parsed local date time
-     */
-    private LocalDateTime parseStringToDateTime(String timeStr, String dateStr) {
-        int time = Integer.parseInt(timeStr);
-        logger.debug("Parsing time " + timeStr + " and date "+ dateStr + " to java.LocalDateTime");
-        return LocalDateTime.parse(dateStr + " " + time / 100 + ":" + time % 100, formatter);
-    }
-
-    /**
-     * Formats LocalDateTime
-     *
-     * @param dateTime local date and time
-     * @return formatted local date and time in format of "yyyy-MM-dd H:m"
-     */
-    private LocalDateTime formatDateTime(LocalDateTime dateTime) {
-        logger.debug("Parsing LocalDateTime " + dateTime + " to format of "+ formatter.toString());
-        return LocalDateTime.parse(dateTime.format(formatter), formatter);
     }
 }

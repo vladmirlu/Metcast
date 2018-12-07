@@ -28,4 +28,15 @@ public class UserDTO {
     @Size(min = 6, max = 20)
     private String password;
 
+    /**
+     * Customised to string method
+     *
+     * @return current object as string
+     * */
+    @Override
+    public String toString(){
+        return new StringBuilder().append("UserDTO: { id: ").append(id).append(", username")
+                .append(username).append(", email: ").append(email).toString();
+    }
+
 }

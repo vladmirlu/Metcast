@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 
 /**
  * Service to organise user data for registration and authentication
- * */
+ */
 @Service
 public class AuthService {
 
@@ -28,19 +28,19 @@ public class AuthService {
 
     /**
      * User repository
-     * */
+     */
     @Autowired
     private UserDao userDao;
 
     /**
      * Object to provide data from property file
-     * */
+     */
     @Autowired
     private ResourceBundle resBundle;
 
     /**
      * Spring authentication manager
-     * */
+     */
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -52,11 +52,11 @@ public class AuthService {
      *
      * @param userDTO user data transfer  to provide user data
      * @return response entity with informational response of success user creation
-     * */
-    public ResponseEntity<?> createUserAccount(UserDTO userDTO){
+     */
+    public ResponseEntity<?> createUserAccount(UserDTO userDTO) {
 
         logger.debug("Creating account for user: " + userDTO.toString());
-        User user =  userDao.save(entityProviderBuilder.getPreparedForCreationUser(userDTO));
+        User user = userDao.save(entityProviderBuilder.userDtoToUser(userDTO));
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/users/{username}").buildAndExpand(user.getUsername()).toUri();
         logger.debug("Account for user: " + user.toString() + " created");
 
@@ -68,8 +68,8 @@ public class AuthService {
      *
      * @param userDTO user data transfer object (DTO)
      * @return current user data spring security authentication
-     * */
-    public Authentication authenticateUser(UserDTO userDTO){
+     */
+    public Authentication authenticateUser(UserDTO userDTO) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);

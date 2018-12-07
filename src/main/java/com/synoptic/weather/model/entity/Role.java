@@ -28,4 +28,15 @@ public class Role {
     @NaturalId
     @Column(length = 60)
     private RoleName name;
+
+    /**
+     * Customised to string method
+     *
+     * @return current object as string
+     */
+    @Override
+    public String toString(){
+        return new StringBuilder().append(" Role: { id: ").append(id)
+                .append(", name: ").append(name).toString();
+    }
 }
