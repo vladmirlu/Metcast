@@ -38,8 +38,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
-
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles("test")
 @TestPropertySource("classpath:application.properties")
