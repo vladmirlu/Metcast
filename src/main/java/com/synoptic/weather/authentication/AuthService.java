@@ -1,6 +1,7 @@
 package com.synoptic.weather.authentication;
 
 import com.synoptic.weather.authentication.response.ApiResponse;
+import com.synoptic.weather.exception.RestBadRequestException;
 import com.synoptic.weather.model.repository.UserDao;
 import com.synoptic.weather.model.entity.dto.UserDTO;
 import com.synoptic.weather.model.entity.User;
@@ -44,6 +45,9 @@ public class AuthService {
     @Autowired
     AuthenticationManager authenticationManager;
 
+    /**
+     *Entity provider and builder
+     * */
     @Autowired
     private EntityProviderBuilder entityProviderBuilder;
 
@@ -56,11 +60,32 @@ public class AuthService {
     public ResponseEntity<?> createUserAccount(UserDTO userDTO) {
 
         logger.debug("Creating account for user: " + userDTO.toString());
-        User user = userDao.save(entityProviderBuilder.userDtoToUser(userDTO));
+        User user = createUserIfNotExist(userDTO);
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/users/{username}").buildAndExpand(user.getUsername()).toUri();
         logger.debug("Account for user: " + user.toString() + " created");
 
         return ResponseEntity.created(location).body(new ApiResponse(true, resBundle.getString("registerSuccess")));
+    }
+
+    /**
+     * Creates user if not exist or goes throw exception if user with current username or email found
+     *
+     * @param userDTO user data transfer  to provide user data
+     * @return new created user
+     */
+    private User createUserIfNotExist(UserDTO userDTO){
+
+        User user = entityProviderBuilder.getUserByUsernameAndEmail(userDTO.getUsername(), userDTO.getEmail());
+
+        if(user.getUsername().equals(userDTO.getUsername())){
+            logger.error("Username: " + userDTO.getUsername() + " is already taken. Process goes throw new RestBadRequestException");
+            throw new RestBadRequestException(resBundle.getString("usernameIsTaken"));
+        }
+        if (user.getEmail().equals(userDTO.getEmail())) {
+            logger.error("Email: " + userDTO.getEmail() + " is already in use. Process goes throw new RestBadRequestException");
+            throw new RestBadRequestException(resBundle.getString("emailInUse"));
+        }
+        return userDao.save(entityProviderBuilder.userDtoToUser(userDTO));
     }
 
     /**

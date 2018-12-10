@@ -1,38 +1,52 @@
 package com.synoptic.weather.metcast;
 
-import com.synoptic.weather.authentication.security.WebMvcConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synoptic.weather.ApplicationStart;
+import com.synoptic.weather.model.entity.WeatherCard;
 import com.synoptic.weather.model.entity.dto.WeatherCardDTO;
+import com.synoptic.weather.model.entity.dto.WeatherUnitDTO;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
-@WebAppConfiguration
+
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {WebMvcConfig.class})
+@ActiveProfiles("test")
+@TestPropertySource("classpath:application.properties")
+@SpringBootTest(classes = {ApplicationStart.class})
+@WebAppConfiguration
+//@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class SynopticControllerIntegrationTest {
 
     private String baseURL;
@@ -45,46 +59,49 @@ public class SynopticControllerIntegrationTest {
 
     Set<String> locations;
 
-    List<Long> cardIds;
-
-    @Autowired
+    @Mock
     private SynopticService synopticService;
 
+    @InjectMocks
+    private SynopticController synopticController;
+
     private WeatherCardDTO cardDTO;
+
+    private MockMvc mockMvc;
 
     @Before
     public void init(){
 
-        MockitoAnnotations.initMocks(this);
-
-        synopticService = new SynopticService();
+        mockMvc = MockMvcBuilders.standaloneSetup(synopticController).build();
 
         baseURL = "http://localhost:8181/api/weather/cards/";
         username = "vlad";
-        location = "Buffalo";
-        locations = Collections.singleton("Kansas");
+        location = "Kiev";
+        locations = Collections.singleton("Kiev");
         cardDTO = WeatherCardDTO.builder().id(1L).location(location).weatherUnitDTOS(Collections.emptyList()).build();
         cardDTOS = Arrays.asList(cardDTO);
-        cardIds = Arrays.asList(1L, 2L, 3L);
 
+        when(synopticService.setWeather(Mockito.any(WeatherCardDTO.class))).thenReturn(cardDTO);
     }
 
     @Test
-    public void getUserAllWeatherCardsTest() {
+    public void getUserAllWeatherCardsTest() throws Exception {
 
-        ResponseEntity<List<WeatherCardDTO>> responseEntity = synopticService.findUserAllWeatherCards(username);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        MvcResult mvcResult = this.mockMvc.perform(get(baseURL + username))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertEquals(200,
+                mvcResult.getResponse().getStatus());
     }
 
-   /* public void validateCORSHttpHeaders(HttpHeaders headers){
-        assertThat(headers.getAccessControlAllowOrigin(), is("*"));
-        assertThat(headers.getAccessControlAllowHeaders(), hasItem("*"));
-        assertThat(headers.getAccessControlMaxAge(), is(3600L));
-        assertThat(headers.getAccessControlAllowMethods(), hasItems(
-                HttpMethod.GET,
-                HttpMethod.POST,
-                HttpMethod.PUT,
-                HttpMethod.OPTIONS,
-                HttpMethod.DELETE));
-    }*/
+    public static String asJsonString(final Object obj) {
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

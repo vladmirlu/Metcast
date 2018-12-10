@@ -64,7 +64,7 @@ public class EntityProviderBuilder {
      * @param username current user username
      * @return existing user or goes throw ResourceNotFoundException exception
      */
-    public User getUserOrError(String username) {
+    public User getUserByUsername(String username) {
 
         logger.debug("The user " + username + " is providing");
         return userDao.findByUsername(username)
@@ -77,7 +77,7 @@ public class EntityProviderBuilder {
      * @param location current location
      * @return existing weather card or goes throw ResourceNotFoundException exception
      */
-    public WeatherCard getWeatherCardOrError(String location) {
+    public WeatherCard getWeatherCardByLocation(String location) {
 
         logger.debug("The geographic location " + location + " is providing");
         return cardDao.findWeatherCardByLocation(location)
@@ -91,7 +91,7 @@ public class EntityProviderBuilder {
      * @param user     current user
      * @return existing weather card or new created
      */
-    public WeatherCard getExistingCardOrNewCreated(String location, User user) {
+    public WeatherCard getExistingCardOrCreated(String location, User user) {
 
         logger.debug("The user " + user + " and geographic location" + location + " are providing");
         return cardDao.findWeatherCardByLocation(location)
@@ -114,13 +114,13 @@ public class EntityProviderBuilder {
      * Prepare new user from user DTO with role USER and encode user password
      *
      * @param userDTO user DTO
-     * @return  prepared user or goes throw MetcastAppException exception
+     * @return prepared user or goes throw MetcastAppException exception
      */
     public User userDtoToUser(UserDTO userDTO) {
 
         logger.debug("The new user to register " + userDTO + " is creating");
         return User.builder().username(userDTO.getUsername()).email(userDTO.getEmail())
-                .password(passwordEncoder.encode(userDTO.getPassword())).roles(Collections.singleton(getRoleUserOrError())).build();
+                .password(passwordEncoder.encode(userDTO.getPassword())).roles(Collections.singleton(getRoleUSER())).build();
     }
 
     /**
@@ -129,11 +129,25 @@ public class EntityProviderBuilder {
      * @param usernameOrEmail username or email
      * @return existing user or goes throw UsernameNotFoundException exception
      */
-    public User getUserByUsernameOrEmailOrError(String usernameOrEmail) {
+    public User getUserByUsernameOrEmail(String usernameOrEmail) {
 
         logger.debug("The user " + usernameOrEmail + " is providing");
         return userDao.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
                 .orElseThrow(() -> new UsernameNotFoundException(resBundle.getString("userNotFoundWith") + usernameOrEmail));
+    }
+
+    /**
+     * Gets user by username or email name
+     *
+     * @param username username
+     * @param email username or email
+     * @return existing user or goes throw UsernameNotFoundException exception
+     */
+    public User getUserByUsernameAndEmail(String username, String email) {
+
+        logger.debug("The user of username:" + username + ", email: "+ email + " is providing");
+        return userDao.findByUsernameOrEmail(username, email)
+                .orElse(User.builder().username("").email("").build());
     }
 
     /**
@@ -142,7 +156,7 @@ public class EntityProviderBuilder {
      * @param userId user id
      * @return existing user or goes throw UsernameNotFoundException exception
      */
-    public User getUserByIdOrError(Long userId) {
+    public User getUserById(Long userId) {
 
         logger.debug("The user with id: " + userId + " is providing");
         return userDao.findById(userId)
@@ -153,12 +167,12 @@ public class EntityProviderBuilder {
      * Gets role USER from repository
      *
      * @return User role named 'ROLE_USER'
-     * */
-    public Role getRoleUserOrError(){
+     */
+    public Role getRoleUSER() {
 
         logger.debug("The Role : " + RoleName.ROLE_USER + " is providing");
-       return roleDao.findByName(RoleName.ROLE_USER)
-               .orElseThrow(() -> new MetcastAppException(resBundle.getString("useRoleNotSet")));
+        return roleDao.findByName(RoleName.ROLE_USER)
+                .orElseThrow(() -> new MetcastAppException(resBundle.getString("useRoleNotSet")));
     }
 
 }

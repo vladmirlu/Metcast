@@ -19,14 +19,6 @@ public class ApplicationStart {
     private final static Logger logger = Logger.getLogger(ApplicationStart.class);
 
     /**
-     * Sets default UTC time zone
-     * */
-    @PostConstruct
-    void init() {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-    }
-
-    /**
      * App entry point
      * */
     public static void main(String[] args) {

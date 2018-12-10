@@ -32,8 +32,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
 
-        User user = entityProviderBuilder.getUserByUsernameOrEmailOrError(usernameOrEmail);
-
+        User user = entityProviderBuilder.getUserByUsernameOrEmail(usernameOrEmail);
+        logger.debug("Load user by username or email: " + usernameOrEmail);
         return UserPrincipal.create(user);
     }
 
@@ -46,8 +46,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional
     public UserDetails loadUserById(Long userId) {
 
-        User user = entityProviderBuilder.getUserByIdOrError(userId);
-
+        User user = entityProviderBuilder.getUserById(userId);
+        logger.debug("Load user by id: " + userId);
         return UserPrincipal.create(user);
     }
 }

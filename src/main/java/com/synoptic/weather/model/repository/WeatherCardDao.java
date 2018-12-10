@@ -28,10 +28,4 @@ public interface WeatherCardDao extends CrudRepository<WeatherCard, Long> {
      * */
     Optional<WeatherCard> findWeatherCardByLocation(String location);
 
-    /**
-     * Checks if weather card exists by location
-     *
-     * @param location location
-     * */
-    Boolean existsByLocation(String location);
 }

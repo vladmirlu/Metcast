@@ -27,17 +27,5 @@ public interface UserDao extends CrudRepository<User, Long> {
      * */
     Optional<User> findByUsername(String username);
 
-    /**
-     * Checks if user exists by username
-     *
-     * @param username user username
-     * */
-    Boolean existsByUsername(String username);
 
-    /**
-     * Checks if user exists by email
-     *
-     * @param email user email
-     * */
-    Boolean existsByEmail(String email);
 }

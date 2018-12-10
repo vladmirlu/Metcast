@@ -53,12 +53,12 @@ public class SynopticService {
      */
     public ResponseEntity<List<Long>> adjustWeatherCardList(Set<String> locations, String username) {
 
-        User user = entityProviderBuilder.getUserOrError(username);
+        User user = entityProviderBuilder.getUserByUsername(username);
         List<Long> cardIds = new ArrayList<>();
         for (String location : locations) {
 
-            WeatherCardDTO cardDTO = weatherDataBuilder.fillWeatherCardDTO(WeatherCardDTO.builder().location(location).build());
-            WeatherCard card = entityProviderBuilder.getExistingCardOrNewCreated(location, user);
+            WeatherCardDTO cardDTO = setWeather(WeatherCardDTO.builder().location(location).build());
+            WeatherCard card = entityProviderBuilder.getExistingCardOrCreated(location, user);
             cardIds.add(saveWeatherCard(card, cardDTO, user).getId());
             logger.info("Weather card  of geographic location: " + location + " is adjusted");
         }
@@ -116,7 +116,7 @@ public class SynopticService {
     public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String username) {
 
         logger.debug("Weather cards of user " + username + " are searching");
-        List<WeatherCard> cards = cardDao.findAllByUsersContaining(entityProviderBuilder.getUserOrError(username));
+        List<WeatherCard> cards = cardDao.findAllByUsersContaining(entityProviderBuilder.getUserByUsername(username));
         cardDTOs = new ArrayList<>();
 
         for (WeatherCard card : cards) {
@@ -124,7 +124,7 @@ public class SynopticService {
             cardDTOs.add(entityProviderBuilder.weatherCardToDTO(card));
         }
         logger.debug("Filling each weather card DTO with weather data in list: " + cardDTOs);
-        cardDTOs.forEach(dto -> dto = weatherDataBuilder.fillWeatherCardDTO(dto));
+        cardDTOs.forEach(dto -> dto = setWeather(dto));
 
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(120, TimeUnit.SECONDS)).body(cardDTOs);
     }
@@ -141,8 +141,8 @@ public class SynopticService {
     @CachePut
     public ResponseEntity<WeatherCardDTO> removeWeatherCardDTO(String location, String username) {
 
-        WeatherCard weatherCard = entityProviderBuilder.getWeatherCardOrError(location);
-        User user = entityProviderBuilder.getUserOrError(username);
+        WeatherCard weatherCard = entityProviderBuilder.getWeatherCardByLocation(location);
+        User user = entityProviderBuilder.getUserByUsername(username);
         logger.debug("Received data from database: user:" + user + "; weather card: " + weatherCard);
 
         if (weatherCard.getUsers().contains(user)) {
@@ -160,6 +160,11 @@ public class SynopticService {
         return ResponseEntity.ok(entityProviderBuilder.weatherCardToDTO(weatherCard));
     }
 
+    public WeatherCardDTO setWeather(WeatherCardDTO cardDTO){
+
+        return weatherDataBuilder.fillWeatherCardDTO(cardDTO);
+    }
+
     /**
      * Evicts cached weather data and prints informational message
      */
@@ -168,4 +173,5 @@ public class SynopticService {
         logger.info("Cleaning of weather data caches");
         System.out.println("Flush Cache " + LocalDateTime.now());
     }
+
 }

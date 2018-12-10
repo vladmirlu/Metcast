@@ -10,9 +10,9 @@ import java.time.format.DateTimeFormatter;
  * Component to format data
  * */
 @Component
-public class DateFormatter {
+public class DateParserFormatter {
 
-    private static final Logger logger = Logger.getLogger(DateFormatter.class);
+    private static final Logger logger = Logger.getLogger(DateParserFormatter.class);
 
     /**
      * Date and time formatter
