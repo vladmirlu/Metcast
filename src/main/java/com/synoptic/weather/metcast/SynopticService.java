@@ -1,5 +1,6 @@
 package com.synoptic.weather.metcast;
 
+import com.synoptic.weather.model.entity.dto.WeatherUnitDTO;
 import com.synoptic.weather.model.repository.WeatherCardDao;
 import com.synoptic.weather.model.entity.dto.WeatherCardDTO;
 import com.synoptic.weather.model.entity.User;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Service for organising weather data for rest controller
@@ -39,6 +41,7 @@ public class SynopticService {
     @Autowired
     private WeatherDataBuilder weatherDataBuilder;
 
+    private List <WeatherCardDTO> cardDTOs;
     /**
      * Adjusts weather data lists for exact locations
      *
@@ -94,25 +97,34 @@ public class SynopticService {
 
         logger.debug("Weather cards of user " + username + " are searching");
         List<WeatherCard> cards = cardDao.findAllByUsersContaining(entityProviderBuilder.getUserByUsername(username));
-        List<WeatherCardDTO> cardDTOs = new ArrayList<>();
+        cardDTOs = new ArrayList<>();
 
         for (WeatherCard card : cards) {
             logger.debug("Adding to list DTO of weather card " + card);
             cardDTOs.add(entityProviderBuilder.weatherCardToDTO(card));
         }
-        cardDTOs = refreshWeatherDTOs(cardDTOs);
+        refreshWeatherDTOs(cardDTOs);
+        cardDTOs.stream().filter(unitDTO -> unitDTO.getWeatherUnitDTOS()
+                 .get(0).getDateTime().isBefore(LocalDateTime.now().minusMinutes(1)))
+                 .forEach(cardDTO -> oneLocationCacheEvict(cardDTO));
+
         return cardDTOs;
     }
 
-    @Cacheable(value = "cardDTOs")
-    public List<WeatherCardDTO> refreshWeatherDTOs(List<WeatherCardDTO> cardDTOs ){
-
+    @Cacheable
+    public void refreshWeatherDTOs(List<WeatherCardDTO> cardDTOs ){
+        simulateSlowService();
         logger.debug("Filling each weather card DTO with weather data in list: " + cardDTOs);
         cardDTOs.forEach(dto -> dto = setWeather(dto));
-
-        return cardDTOs;
     }
 
+    private void simulateSlowService() {
+        try {
+            Thread.sleep(4000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
     public WeatherCardDTO setWeather(WeatherCardDTO cardDTO){
 
@@ -152,7 +164,7 @@ public class SynopticService {
     @CacheEvict(value = "cardDTOs", key="#cardDTO.location")
     public WeatherCardDTO oneLocationCacheEvict(WeatherCardDTO cardDTO) {
         logger.info("Cleaning of weather data caches of location " + cardDTO.getLocation());
-        System.out.println("Flush Cache " + LocalDateTime.now());
+        System.out.println("Flush Weather card DTO Cache: " + cardDTO);
         return cardDTO;
     }
 

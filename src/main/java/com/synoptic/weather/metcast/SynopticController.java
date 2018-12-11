@@ -35,7 +35,7 @@ public class SynopticController {
     public ResponseEntity<List<WeatherCardDTO>> getUserAllWeatherCards(@PathVariable("username") String username) {
 
         logger.info("Weather cards of user " + username + " are requested");
-       return ResponseEntity.ok().cacheControl(CacheControl.maxAge(120, TimeUnit.SECONDS)).body(synopticService.findUserAllWeatherCards(username));
+       return ResponseEntity.ok(synopticService.findUserAllWeatherCards(username));
     }
 
     /**
