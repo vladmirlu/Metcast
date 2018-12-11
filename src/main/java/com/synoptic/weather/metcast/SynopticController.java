@@ -3,12 +3,14 @@ package com.synoptic.weather.metcast;
 import com.synoptic.weather.model.entity.dto.WeatherCardDTO;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Rest controller of current weather API
@@ -33,7 +35,7 @@ public class SynopticController {
     public ResponseEntity<List<WeatherCardDTO>> getUserAllWeatherCards(@PathVariable("username") String username) {
 
         logger.info("Weather cards of user " + username + " are requested");
-        return synopticService.findUserAllWeatherCards(username);
+       return ResponseEntity.ok().cacheControl(CacheControl.maxAge(120, TimeUnit.SECONDS)).body(synopticService.findUserAllWeatherCards(username));
     }
 
     /**

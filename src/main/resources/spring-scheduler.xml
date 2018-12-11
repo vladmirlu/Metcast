@@ -7,7 +7,7 @@
     <task:scheduler id="scheduler" pool-size="2" />
 
     <task:scheduled-tasks scheduler="scheduler">
-        <task:scheduled ref="synopticService" method="reportCacheEvict" cron="2 * * * * *"/>
+        <task:scheduled ref="synopticService" method="allLocationsCacheEvict" cron="2 * * * * *"/>
     </task:scheduled-tasks>
 
 </beans>

@@ -70,7 +70,7 @@ public class SynopticControllerUnitTest {
     @Test
    public void getUserAllWeatherCardsTest() throws Exception {
 
-        when(synopticService.findUserAllWeatherCards(username)).thenReturn(ResponseEntity.ok(cardDTOS));
+        when(synopticService.findUserAllWeatherCards(username)).thenReturn(cardDTOS);
         mockMvc.perform(get(baseURL + username))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))

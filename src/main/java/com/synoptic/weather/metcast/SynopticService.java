@@ -90,14 +90,7 @@ public class SynopticService {
      * @param username current user username
      * @return response entity of weather card DTOs
      */
-
-    @Cacheable(value = "cardDTOs")
-    public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String username) {
-
-        return ResponseEntity.ok().cacheControl(CacheControl.maxAge(120, TimeUnit.SECONDS)).body(getUserWeatherDTOs(username));
-    }
-
-    private List<WeatherCardDTO> getUserWeatherDTOs(String username){
+    public List<WeatherCardDTO> findUserAllWeatherCards(String username) {
 
         logger.debug("Weather cards of user " + username + " are searching");
         List<WeatherCard> cards = cardDao.findAllByUsersContaining(entityProviderBuilder.getUserByUsername(username));
@@ -107,6 +100,12 @@ public class SynopticService {
             logger.debug("Adding to list DTO of weather card " + card);
             cardDTOs.add(entityProviderBuilder.weatherCardToDTO(card));
         }
+        cardDTOs = refreshWeatherDTOs(cardDTOs);
+        return cardDTOs;
+    }
+
+    @Cacheable(value = "cardDTOs")
+    public List<WeatherCardDTO> refreshWeatherDTOs(List<WeatherCardDTO> cardDTOs ){
 
         logger.debug("Filling each weather card DTO with weather data in list: " + cardDTOs);
         cardDTOs.forEach(dto -> dto = setWeather(dto));
@@ -129,7 +128,6 @@ public class SynopticService {
      * @param username current user username
      * @return response entity of deleted weather card DTO
      */
-    @CacheEvict(value = "cardDTOs")
     public ResponseEntity<WeatherCardDTO> removeWeatherCardDTO(String location, String username) {
 
         WeatherCard weatherCard = entityProviderBuilder.getWeatherCardByLocation(location);
@@ -145,15 +143,24 @@ public class SynopticService {
             cardDao.delete(weatherCard);
             logger.debug("Delete user weather card " + weatherCard);
         }
-
-        return ResponseEntity.ok(entityProviderBuilder.weatherCardToDTO(weatherCard));
+        return ResponseEntity.ok(oneLocationCacheEvict(entityProviderBuilder.weatherCardToDTO(weatherCard)));
     }
 
     /**
-     * Evicts cached weather data and prints informational message
+     * Evicts cached weather data of one location and prints informational message
+     */
+    @CacheEvict(value = "cardDTOs", key="#cardDTO.location")
+    public WeatherCardDTO oneLocationCacheEvict(WeatherCardDTO cardDTO) {
+        logger.info("Cleaning of weather data caches of location " + cardDTO.getLocation());
+        System.out.println("Flush Cache " + LocalDateTime.now());
+        return cardDTO;
+    }
+
+    /**
+     * Evicts cached weather data of all location and prints informational message
      */
     @CacheEvict(allEntries = true, value = "cardDTOs")
-    public void reportCacheEvict() {
+    public void allLocationsCacheEvict() {
         logger.info("Cleaning of weather data caches");
         System.out.println("Flush Cache " + LocalDateTime.now());
     }
