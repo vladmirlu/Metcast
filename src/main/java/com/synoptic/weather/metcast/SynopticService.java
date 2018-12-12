@@ -114,7 +114,7 @@ public class SynopticService {
      * @param username current user username
      * @return response entity of weather card DTOs
      */
-    @Cacheable
+
     public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String username) {
 
         logger.debug("Weather cards of user " + username + " are searching");
@@ -128,7 +128,7 @@ public class SynopticService {
         logger.debug("Filling each weather card DTO with weather data in list: " + cardDTOs);
         cardDTOs.forEach(dto -> dto = setWeather(dto));
 
-        return ResponseEntity.ok().cacheControl(CacheControl.maxAge(120, TimeUnit.SECONDS)).body(cardDTOs);
+        return ResponseEntity.ok(cardDTOs);
     }
 
     /**
@@ -162,9 +162,20 @@ public class SynopticService {
         return ResponseEntity.ok(entityProviderBuilder.weatherCardToDTO(weatherCard));
     }
 
+    @Cacheable
     public WeatherCardDTO setWeather(WeatherCardDTO cardDTO){
 
         return weatherDataBuilder.fillWeatherCardDTO(cardDTO);
+    }
+
+    /**
+     * Evicts cached weather data of one location and prints informational message
+     */
+    @CacheEvict(value = "cardDTOs", key="#cardDTO.location")
+    public WeatherCardDTO oneLocationCacheEvict(WeatherCardDTO cardDTO) {
+        logger.info("Cleaning of weather data caches of location " + cardDTO.getLocation());
+        System.out.println("Flush Weather card DTO Cache: " + cardDTO);
+        return cardDTO;
     }
 
     /**
