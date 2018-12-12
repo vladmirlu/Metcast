@@ -120,10 +120,11 @@ public class WeatherDataBuilder {
     public WeatherUnitDTO buildWeatherUnit(JSONObject weatherObjJSON, LocalDateTime dateTime) {
 
         if(weatherObjJSON.isEmpty()) throw new ResourceNotFoundException("JSONObject", "weatherObjJSON", weatherObjJSON);
+
         logger.debug("Fill weather card DTO of date time: " + dateTime + " with selected weather data: " + weatherObjJSON.toString());
         return WeatherUnitDTO.builder().dateTime(dateTime)
                 .weatherDescription(weatherObjJSON.getJSONArray("weatherDesc").getJSONObject(0).getString("value"))
-                .tempCelsius(dateTime.isAfter(dateParserFormatter.formatDateTime(LocalDateTime.now())) ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
+                .tempCelsius(dateTime.isAfter(dateParserFormatter.formatDateTime(LocalDateTime.now().plusMinutes(1))) ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
                 .precipitationMM(weatherObjJSON.getFloat("precipMM"))
                 .pressureMillibars(weatherObjJSON.getInt("pressure"))
                 .humidityPercent(weatherObjJSON.getInt("humidity"))

@@ -96,13 +96,15 @@ public class SynopticService {
     @CachePut
     public WeatherCardDTO updateUserCardDTOs(WeatherCardDTO cardDTO) {
 
+        boolean exists = false;
         for (int i = 0; i < cardDTOs.size(); i++) {
-
             logger.debug("Update List<WeatherCardDTO> :" + cardDTOs + " with WeatherCardDTO: " + cardDTO);
-            if (cardDTOs.get(i).getLocation().equals(cardDTO.getLocation()))
+            if (cardDTOs.get(i).getLocation().equals(cardDTO.getLocation())) {
                 cardDTOs.set(i, cardDTO);
-            else cardDTOs.add(cardDTO);
+                exists = true;
+            }
         }
+        if(!exists) cardDTOs.add(cardDTO);
         return cardDTO;
     }
 
