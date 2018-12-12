@@ -17,8 +17,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 /**
@@ -95,7 +97,7 @@ public class EntityProviderBuilder {
 
         logger.debug("The user " + user + " and geographic location" + location + " are providing");
         return cardDao.findWeatherCardByLocation(location)
-                .orElse(WeatherCard.builder().location(location).users(new ArrayList<>(Collections.singletonList(user))).build());
+                .orElse(WeatherCard.builder().location(location).users(new HashMap<>(Collections.singletonMap(LocalDateTime.now(), user))).build());
     }
 
     /**

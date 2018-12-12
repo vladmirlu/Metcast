@@ -13,19 +13,21 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * Service for organising weather data for rest controller
  */
 @Service
-@CacheConfig(cacheNames = {"cardDTOs"})
 public class SynopticService {
 
     private static final Logger logger = Logger.getLogger(SynopticService.class);
@@ -40,11 +42,6 @@ public class SynopticService {
     private WeatherDataBuilder weatherDataBuilder;
 
     /**
-     * List of weather data transfer objects
-     */
-    private List<WeatherCardDTO> cardDTOs;
-
-    /**
      * Adjusts weather data lists for exact locations
      *
      * @param locations exact weather locations
@@ -57,7 +54,7 @@ public class SynopticService {
         List<Long> cardIds = new ArrayList<>();
         for (String location : locations) {
 
-            WeatherCardDTO cardDTO = setWeather(WeatherCardDTO.builder().location(location).build());
+            WeatherCardDTO cardDTO = weatherDataBuilder.fillWeatherCardDTO(WeatherCardDTO.builder().location(location).build());
             WeatherCard card = entityProviderBuilder.getExistingCardOrCreated(location, user);
             cardIds.add(saveWeatherCard(card, cardDTO, user).getId());
             logger.info("Weather card  of geographic location: " + location + " is adjusted");
@@ -75,36 +72,15 @@ public class SynopticService {
      */
     public WeatherCardDTO saveWeatherCard(WeatherCard card, WeatherCardDTO cardDTO, User user) {
 
-        if (!card.getUsers().contains(user)) {
-            card.getUsers().add(user);
+        if (!card.getUsers().values().contains(user)) {
+            card.getUsers().put(LocalDateTime.now(), user);
         }
         logger.debug("Update weather card: " + card);
         cardDao.save(card);
         cardDTO.setId(card.getId());
 
-        logger.debug("Update List<WeatherCardDTO> :" + cardDTOs + " with WeatherCardDTO: " + cardDTO + " of user: " + user);
+        logger.debug("Update List<WeatherCardDTO>  with WeatherCardDTO: " + cardDTO + " of user: " + user);
 
-        return updateUserCardDTOs(cardDTO);
-    }
-
-    /**
-     * Sets or adds weather card DTO to DTO list and updates it exists and updates cached data
-     *
-     * @param cardDTO weather data transfer object to transport data from backend to frontend (DTO)
-     * @return filled weather DTO
-     */
-    @CachePut
-    public WeatherCardDTO updateUserCardDTOs(WeatherCardDTO cardDTO) {
-
-        boolean exists = false;
-        for (int i = 0; i < cardDTOs.size(); i++) {
-            logger.debug("Update List<WeatherCardDTO> :" + cardDTOs + " with WeatherCardDTO: " + cardDTO);
-            if (cardDTOs.get(i).getLocation().equals(cardDTO.getLocation())) {
-                cardDTOs.set(i, cardDTO);
-                exists = true;
-            }
-        }
-        if(!exists) cardDTOs.add(cardDTO);
         return cardDTO;
     }
 
@@ -115,20 +91,33 @@ public class SynopticService {
      * @return response entity of weather card DTOs
      */
 
+
     public ResponseEntity<List<WeatherCardDTO>> findUserAllWeatherCards(String username) {
 
         logger.debug("Weather cards of user " + username + " are searching");
-        List<WeatherCard> cards = cardDao.findAllByUsersContaining(entityProviderBuilder.getUserByUsername(username));
-        cardDTOs = new ArrayList<>();
+        User user = entityProviderBuilder.getUserByUsername(username);
+        List<WeatherCard> cards = cardDao.findAllByUsersContaining(user);
+
+        return ResponseEntity.ok(refreshWeatherDTOs(cards, user));
+    }
+
+    public List<WeatherCardDTO> refreshWeatherDTOs(List<WeatherCard> cards, User user){
+
+        List<WeatherCardDTO> cardDTOs = new ArrayList<>();
 
         for (WeatherCard card : cards) {
             logger.debug("Adding to list DTO of weather card " + card);
-            cardDTOs.add(entityProviderBuilder.weatherCardToDTO(card));
-        }
-        logger.debug("Filling each weather card DTO with weather data in list: " + cardDTOs);
-        cardDTOs.forEach(dto -> dto = setWeather(dto));
 
-        return ResponseEntity.ok(cardDTOs);
+            WeatherCardDTO cardDTO = entityProviderBuilder.weatherCardToDTO(card);
+
+            for(LocalDateTime dateTime: card.getUsers().keySet()){
+                if(dateTime.isBefore(LocalDateTime.now().minusMinutes(2))){
+                    cardDTO = weatherDataBuilder.fillWeatherCardDTO(cardDTO);
+                }
+            }
+            cardDTOs.add(cardDTO);
+        }
+        return cardDTOs;
     }
 
     /**
@@ -140,51 +129,28 @@ public class SynopticService {
      * @param username current user username
      * @return response entity of deleted weather card DTO
      */
-    @CachePut
+
     public ResponseEntity<WeatherCardDTO> removeWeatherCardDTO(String location, String username) {
 
         WeatherCard weatherCard = entityProviderBuilder.getWeatherCardByLocation(location);
         User user = entityProviderBuilder.getUserByUsername(username);
         logger.debug("Received data from database: user:" + user + "; weather card: " + weatherCard);
 
-        if (weatherCard.getUsers().contains(user)) {
-            weatherCard.getUsers().remove(user);
+        for (User u: weatherCard.getUsers().values()) {
+            if(u.getUsername().equals(username)){
+                weatherCard.getUsers().values().remove(u);
+            }
             cardDao.save(weatherCard);
             logger.debug("Delete user " + user + " from users list of weather card " + weatherCard);
         }
+
         if (weatherCard.getUsers().isEmpty()) {
             cardDao.delete(weatherCard);
             logger.debug("Delete user weather card " + weatherCard);
         }
-        cardDTOs.remove(cardDTOs.stream().filter(dto -> dto.getLocation().equals(location)).findAny().get());
         logger.debug("Delete weather card DTO of location " + location + " from weather card DTO list of user " + user);
 
         return ResponseEntity.ok(entityProviderBuilder.weatherCardToDTO(weatherCard));
-    }
-
-    @Cacheable
-    public WeatherCardDTO setWeather(WeatherCardDTO cardDTO){
-
-        return weatherDataBuilder.fillWeatherCardDTO(cardDTO);
-    }
-
-    /**
-     * Evicts cached weather data of one location and prints informational message
-     */
-    @CacheEvict(value = "cardDTOs", key="#cardDTO.location")
-    public WeatherCardDTO oneLocationCacheEvict(WeatherCardDTO cardDTO) {
-        logger.info("Cleaning of weather data caches of location " + cardDTO.getLocation());
-        System.out.println("Flush Weather card DTO Cache: " + cardDTO);
-        return cardDTO;
-    }
-
-    /**
-     * Evicts cached weather data and prints informational message
-     */
-    @CacheEvict(allEntries = true, value = "cardDTOs")
-    public void reportCacheEvict() {
-        logger.info("Cleaning of weather data caches");
-        System.out.println("Flush Cache " + LocalDateTime.now());
     }
 
 }

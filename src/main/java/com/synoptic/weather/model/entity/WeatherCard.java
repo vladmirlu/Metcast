@@ -7,7 +7,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Weather card entities
@@ -35,8 +38,10 @@ public class WeatherCard {
      * Users list referenced on current weather card
      * */
     @ManyToMany
-    private List <User> users;
-
+   // @ElementCollection
+    @MapKeyColumn(name="myMapKey")
+    @Column(name="users")
+    private Map<LocalDateTime, User> users;
     /**
      * Customised to string method
      *

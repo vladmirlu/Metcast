@@ -16,6 +16,8 @@ public class WeatherCardDTO {
 
     private String location;
 
+    private String username;
+
     /**
      *Weather time conditions list
      * */

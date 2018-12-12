@@ -67,7 +67,7 @@ public class SynopticControllerUnitTest {
         cardIds = Arrays.asList(1L, 2L, 3L);
     }
 
-    @Test
+    /*@Test
    public void getUserAllWeatherCardsTest() throws Exception {
 
         when(synopticService.findUserAllWeatherCards(username)).thenReturn(ResponseEntity.ok(cardDTOS));
@@ -81,7 +81,7 @@ public class SynopticControllerUnitTest {
         verify(synopticService, times(1)).findUserAllWeatherCards(username);
         verifyNoMoreInteractions(synopticService);
         assertEquals(cardDTOS, synopticController.getUserAllWeatherCards(username).getBody());
-    }
+    }*/
 
     @Test
     public void adjustWeatherCardsTest() throws Exception {

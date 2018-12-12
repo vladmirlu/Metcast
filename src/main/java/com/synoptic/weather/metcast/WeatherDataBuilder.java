@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -52,6 +53,7 @@ public class WeatherDataBuilder {
      * @param cardDTO data transfer object(DTO)
      * @return filled weather card DTO
      */
+
     public WeatherCardDTO fillWeatherCardDTO(WeatherCardDTO cardDTO) {
 
         String weatherSourceUrl = WWO_Url + cardDTO.getLocation() + WWO_ApiKey + WWO_DaysForecast;

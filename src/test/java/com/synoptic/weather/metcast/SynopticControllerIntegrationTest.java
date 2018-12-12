@@ -67,7 +67,7 @@ public class SynopticControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
-    @Before
+    /*@Before
     public void init(){
 
         mockMvc = MockMvcBuilders.standaloneSetup(synopticController).build();
@@ -80,7 +80,7 @@ public class SynopticControllerIntegrationTest {
         cardDTOS = Arrays.asList(cardDTO);
 
         when(synopticService.setWeather(Mockito.any(WeatherCardDTO.class))).thenReturn(cardDTO);
-    }
+    }*/
 
     @Test
     public void getUserAllWeatherCardsTest() throws Exception {
