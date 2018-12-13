@@ -7,13 +7,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
 @SpringBootApplication
 @EnableCaching
-@ImportResource("classpath:spring-scheduler.xml")
+@EnableScheduling
 public class ApplicationStart {
 
     private final static Logger logger = Logger.getLogger(ApplicationStart.class);

@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -170,6 +171,7 @@ public class SynopticService {
     /**
      * Evicts cached weather data and prints informational message
      */
+    @Scheduled(cron = "1 * * * * *")
     @CacheEvict(allEntries = true, value = "cardDTOs")
     public void reportCacheEvict() {
         logger.info("Cleaning of weather data caches");
