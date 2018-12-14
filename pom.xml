@@ -15,7 +15,6 @@
     </parent>
 
     <dependencies>
-
         <!--Spring boot-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -39,7 +38,12 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cloud-connectors</artifactId>
         </dependency>
 
         <dependency>
@@ -52,13 +56,6 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa -->
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-jpa</artifactId>
-            <version>2.0.9.RELEASE</version>
         </dependency>
 
         <!-- For Working with Json Web Tokens (JWT) -->
@@ -98,19 +95,42 @@
 
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
+            <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>2.11.0</version>
-            <type>pom</type>
+            <version>1.2.17</version>
         </dependency>
 
+        <!-- testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path-assert</artifactId>
+            <version>2.2.0</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
     <properties>
         <java.version>1.8</java.version>
     </properties>
-
 
     <build>
         <plugins>
@@ -120,6 +140,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
