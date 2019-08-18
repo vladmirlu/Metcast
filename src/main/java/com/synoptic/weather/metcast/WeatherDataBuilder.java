@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -77,7 +78,7 @@ public class WeatherDataBuilder {
         map.put(currentConditionJson.getJSONObject(0).getString("observation_time"), currentConditionJson);
         logger.debug("Received and set weather data of current weather condition: " + currentConditionJson);
         JSONArray jsonArray = jsonObject.getJSONArray("weather");
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 0; i < jsonArray.length(); i++) {
 
             map.put(jsonArray.getJSONObject(i).getString("date"), jsonArray.getJSONObject(i).getJSONArray("hourly"));
             logger.debug("\n Received weather data of the date: " + jsonArray.getJSONObject(i).getString("date") + " data : " + jsonArray.getJSONObject(i).getJSONArray("hourly"));
@@ -124,7 +125,7 @@ public class WeatherDataBuilder {
         logger.debug("Fill weather card DTO of date time: " + dateTime + " with selected weather data: " + weatherObjJSON.toString());
         return WeatherUnitDTO.builder().dateTime(dateTime)
                 .weatherDescription(weatherObjJSON.getJSONArray("weatherDesc").getJSONObject(0).getString("value"))
-                .tempCelsius(dateTime.isAfter(dateParserFormatter.formatDateTime(LocalDateTime.now().plusMinutes(1))) ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
+                .tempCelsius(weatherObjJSON.has("tempC") ? weatherObjJSON.getInt("tempC") : weatherObjJSON.getInt("temp_C"))
                 .precipitationMM(weatherObjJSON.getFloat("precipMM"))
                 .pressureMillibars(weatherObjJSON.getInt("pressure"))
                 .humidityPercent(weatherObjJSON.getInt("humidity"))
